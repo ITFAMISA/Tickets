@@ -9,11 +9,10 @@ iniciarSesion();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Tickets IT</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-        <style>
+    <title>Centro de Soporte IT</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -22,33 +21,20 @@ iniciarSesion();
 
         :root {
             --color-red: #d32f2f;
-            --color-red-dark: #a31616;
-            --color-red-light: #ff6f61;
-            --color-black: #000000;
-            --color-charcoal: #0d0f12;
-            --color-graphite: #181a1f;
-            --color-ink: #202228;
+            --color-red-strong: #b71c1c;
             --color-white: #ffffff;
-            --color-gray-50: #f8f8f8;
-            --color-gray-100: #ededed;
-            --color-gray-300: #d6d6d6;
-            --color-gray-500: #8b8b8b;
-            --shadow-soft: 0 12px 32px rgba(0, 0, 0, 0.15);
-            --shadow-medium: 0 18px 44px rgba(0, 0, 0, 0.18);
-            --shadow-strong: 0 24px 60px rgba(211, 47, 47, 0.35);
+            --color-surface: #f5f5f6;
+            --color-surface-alt: #f0f0f2;
+            --color-text: #111111;
+            --color-muted: rgba(0, 0, 0, 0.6);
+            --color-border: rgba(211, 47, 47, 0.25);
+            --color-border-strong: rgba(211, 47, 47, 0.35);
+            --color-border-soft: rgba(0, 0, 0, 0.08);
+            --shadow-soft: 0 32px 80px rgba(0, 0, 0, 0.12);
+            --radius-sm: 10px;
             --radius-md: 16px;
             --radius-lg: 22px;
-            --transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-            --primary-color: var(--color-red);
-            --primary-dark: var(--color-red-dark);
-            --primary-light: var(--color-red-light);
-            --bg-light: var(--color-white);
-            --text-dark: var(--color-ink);
-            --text-light: var(--color-gray-500);
-            --border-color: rgba(0, 0, 0, 0.08);
-            --success-color: var(--color-red);
-            --warning-color: #ff8f70;
-            --danger-color: var(--color-red);
+            --transition: all 0.35s ease;
         }
 
         html {
@@ -56,543 +42,714 @@ iniciarSesion();
         }
 
         body {
-            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(155deg, var(--color-charcoal) 0%, var(--color-black) 55%, var(--color-gray-50) 140%);
-            color: var(--color-ink);
+            font-family: 'Poppins', sans-serif;
+            background: var(--color-surface);
+            color: var(--color-text);
             min-height: 100vh;
-            line-height: 1.7;
-            overflow-x: hidden;
-            position: relative;
         }
 
-        body::before,
-        body::after {
-            content: '';
-            position: fixed;
-            width: 620px;
-            height: 620px;
-            background: radial-gradient(circle, rgba(211, 47, 47, 0.22) 0%, transparent 70%);
-            z-index: -1;
-            pointer-events: none;
-            animation: glow 12s ease-in-out infinite;
-        }
-
-        body::before {
-            top: -220px;
-            right: -200px;
-        }
-
-        body::after {
-            bottom: -260px;
-            left: -180px;
-            animation-delay: 4s;
-        }
-
-        ::selection {
-            background: var(--color-red);
-            color: var(--color-white);
+        body.modal-open {
+            overflow: hidden;
         }
 
         a {
-            color: var(--color-red);
-            transition: var(--transition);
+            color: inherit;
             text-decoration: none;
         }
 
-        a:hover {
-            color: var(--color-red-dark);
+        .app-header {
+            position: sticky;
+            top: 0;
+            inset-inline: 0;
+            background: var(--color-red);
+            color: var(--color-white);
+            z-index: 40;
+            padding: 1.5rem 5vw;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
         }
 
-        h1, h2, h3, h4, h5, h6 {
-            font-weight: 700;
-            color: var(--color-ink);
+        .app-header__brand {
+            display: flex;
+            align-items: center;
+            gap: 1.1rem;
         }
 
-        p, span, label {
-            color: var(--color-gray-500);
+        .brand-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.18);
+            display: grid;
+            place-items: center;
+            font-size: 1.6rem;
         }
 
-        .container {
+        .app-header__title {
+            font-size: 1.45rem;
+            font-weight: 600;
+            letter-spacing: 0.4px;
+        }
+
+        .app-header__subtitle {
+            font-size: 0.9rem;
+            opacity: 0.85;
+        }
+
+        .app-main {
+            padding: 3rem 0 4rem;
+        }
+
+        .content-shell {
             width: min(1180px, 92vw);
             margin: 0 auto;
+            display: grid;
+            gap: 2.5rem;
         }
 
-        .container-fluid {
-            width: min(1280px, 96vw);
+        .panel {
+            background: var(--color-white);
+            border-radius: var(--radius-lg);
+            border: 1.5px solid var(--color-border);
+            box-shadow: var(--shadow-soft);
+            padding: 2.5rem;
+            display: grid;
+            gap: 1.75rem;
+        }
+
+        .panel--center {
+            max-width: 520px;
             margin: 0 auto;
         }
 
-        .row {
-            --bs-gutter-x: 2.5rem;
-            --bs-gutter-y: 2.5rem;
+        .panel__header {
+            display: grid;
+            gap: 0.6rem;
         }
 
-        .header-main {
-            background: radial-gradient(circle at top left, rgba(211, 47, 47, 0.45), transparent 60%),
-                        linear-gradient(135deg, var(--color-black) 0%, var(--color-graphite) 100%);
-            color: var(--color-white);
-            padding: 4rem 0;
-            border-bottom: 4px solid var(--color-red);
-            position: relative;
-            overflow: hidden;
+        .panel__header h2,
+        .panel__header h3,
+        .panel__header h4 {
+            font-weight: 600;
+            font-size: 1.4rem;
         }
 
-        .header-main .badge {
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(6px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            border-radius: 999px;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
+        .panel__header--inline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
         }
 
-        .header-main h1 {
-            font-size: clamp(2.6rem, 5vw, 3.4rem);
-            letter-spacing: -1px;
-            text-shadow: 0 14px 35px rgba(0, 0, 0, 0.35);
+        .panel__hint {
+            font-size: 0.85rem;
+            color: var(--color-muted);
         }
 
-        .header-main p {
-            font-size: clamp(1rem, 2vw, 1.2rem);
-            color: rgba(255, 255, 255, 0.72);
+        .panel__body {
+            display: grid;
+            gap: 1.5rem;
         }
 
-        .main-card,
-        .card,
-        .card-dashboard {
+        .form-grid {
+            display: grid;
+            gap: 1.25rem;
+        }
+
+        .form-grid--two {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-field {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .form-field label {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="file"],
+        select,
+        textarea {
+            width: 100%;
             background: var(--color-white);
+            border: 1.5px solid var(--color-border-soft);
             border-radius: var(--radius-md);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: var(--shadow-soft);
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .main-card::before,
-        .card::before,
-        .card-dashboard::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), transparent);
-            opacity: 0;
+            padding: 0.85rem 1rem;
+            font-family: inherit;
+            font-size: 0.95rem;
+            color: var(--color-text);
             transition: var(--transition);
         }
 
-        .main-card:hover,
-        .card:hover,
-        .card-dashboard:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-medium);
+        textarea {
+            min-height: 160px;
+            resize: vertical;
         }
 
-        .main-card:hover::before,
-        .card:hover::before,
-        .card-dashboard:hover::before {
-            opacity: 1;
-        }
-
-        .card-header,
-        .card-dashboard .card-header,
-        .stat-card {
-            background: linear-gradient(135deg, var(--color-black) 0%, var(--color-graphite) 100%);
-            color: var(--color-white);
-            border: none;
-            padding: 1.5rem 1.75rem;
-            border-bottom: 3px solid var(--color-red);
-        }
-
-        .card-body {
-            padding: 1.75rem;
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--color-red);
+            box-shadow: 0 0 0 4px rgba(211, 47, 47, 0.15);
         }
 
         .btn {
-            border-radius: 999px;
-            padding: 0.85rem 1.8rem;
-            font-weight: 600;
-            letter-spacing: 0.6px;
-            text-transform: uppercase;
-            position: relative;
-            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            border-radius: var(--radius-md);
             border: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 0.85rem 1.35rem;
+            cursor: pointer;
             transition: var(--transition);
+            background: transparent;
+            color: var(--color-text);
         }
 
-        .btn::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s ease, height 0.6s ease;
+        .btn i {
+            font-size: 1rem;
         }
 
-        .btn:hover::after {
-            width: 380px;
-            height: 380px;
-        }
-
-        .btn-primary,
-        .btn-danger,
-        .btn-floating {
-            background: linear-gradient(135deg, var(--color-red) 0%, var(--color-red-dark) 100%);
+        .btn-primary {
+            background: var(--color-red);
             color: var(--color-white);
-            box-shadow: var(--shadow-strong);
         }
 
         .btn-primary:hover,
-        .btn-danger:hover,
-        .btn-floating:hover {
-            background: linear-gradient(135deg, var(--color-red-dark) 0%, var(--color-black) 100%);
-            transform: translateY(-4px);
+        .btn-primary:focus {
+            background: var(--color-red-strong);
+            transform: translateY(-2px);
         }
 
-        .btn-outline-primary {
-            border: 2px solid var(--color-red);
+        .btn-outline {
+            background: var(--color-white);
+            border: 1.5px solid var(--color-red);
             color: var(--color-red);
-            background: transparent;
         }
 
-        .btn-outline-primary:hover,
-        .btn-outline-primary.active {
+        .btn-outline:hover,
+        .btn-outline:focus {
+            background: rgba(211, 47, 47, 0.12);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1.5px solid rgba(0, 0, 0, 0.08);
+            color: var(--color-text);
+        }
+
+        .btn-ghost:hover,
+        .btn-ghost:focus {
+            border-color: rgba(211, 47, 47, 0.35);
+            color: var(--color-red);
+        }
+
+        .btn-chip {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 999px;
+            padding-inline: 1.25rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-chip.is-active {
             background: var(--color-red);
             color: var(--color-white);
-            box-shadow: var(--shadow-strong);
         }
 
-        .btn-secondary {
-            background: var(--color-gray-50);
-            color: var(--color-ink);
-            border: 2px solid var(--color-gray-100);
+        .btn-sm {
+            padding: 0.6rem 1rem;
+            font-size: 0.85rem;
+            border-radius: 999px;
         }
 
-        .btn-secondary:hover {
-            border-color: var(--color-red);
-            color: var(--color-red);
+        .cta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
         }
 
         .badge {
             display: inline-flex;
             align-items: center;
-            gap: 0.35rem;
+            justify-content: center;
+            padding: 0.35rem 0.9rem;
             border-radius: 999px;
-            padding: 0.45rem 0.9rem;
             font-size: 0.75rem;
-            letter-spacing: 0.6px;
-            text-transform: uppercase;
+            font-weight: 600;
+            border: 1px solid transparent;
+            letter-spacing: 0.4px;
         }
 
-        .bg-danger { background: var(--color-red) !important; color: var(--color-white) !important; }
-        .bg-warning { background: linear-gradient(135deg, #ff8f70, #ff6f61) !important; color: var(--color-white) !important; }
-        .bg-success { background: linear-gradient(135deg, var(--color-red), var(--color-red-light)) !important; color: var(--color-white) !important; }
-        .bg-secondary { background: var(--color-gray-50) !important; color: var(--color-ink) !important; }
-        .bg-primary { background: var(--color-red) !important; color: var(--color-white) !important; }
-        .bg-light { background: rgba(255, 255, 255, 0.85) !important; color: var(--color-ink) !important; }
-
-        .text-muted { color: var(--color-gray-500) !important; }
-        .text-white-80 { color: rgba(255, 255, 255, 0.8); }
-
-        .form-control,
-        .form-select {
-            border-radius: var(--radius-md);
-            border: 2px solid var(--color-gray-100);
-            padding: 0.9rem 1rem;
-            font-size: 0.95rem;
-            transition: var(--transition);
-            color: var(--color-ink);
-            background-color: var(--color-white);
+        .badge-soft {
+            background: rgba(0, 0, 0, 0.06);
+            border-color: rgba(0, 0, 0, 0.08);
+            color: var(--color-text);
         }
 
-        .form-control:focus,
-        .form-select:focus {
-            border-color: var(--color-red);
-            box-shadow: 0 0 0 4px rgba(211, 47, 47, 0.12);
-            outline: none;
-        }
-
-        .input-group-text {
-            border-radius: var(--radius-md) 0 0 var(--radius-md);
-            background: var(--color-gray-50);
-            border: 2px solid var(--color-gray-100);
-            border-right: none;
-            color: var(--color-gray-500);
-            transition: var(--transition);
-        }
-
-        .input-group:focus-within .input-group-text {
+        .bg-primary {
             background: var(--color-red);
-            border-color: var(--color-red);
             color: var(--color-white);
+            border-color: transparent;
+        }
+
+        .bg-danger {
+            background: rgba(211, 47, 47, 0.18);
+            color: var(--color-red);
+            border-color: rgba(211, 47, 47, 0.28);
+        }
+
+        .bg-warning {
+            background: rgba(0, 0, 0, 0.08);
+            color: var(--color-text);
+            border-color: rgba(0, 0, 0, 0.12);
+        }
+
+        .bg-success {
+            background: rgba(211, 47, 47, 0.12);
+            color: var(--color-red);
+            border-color: rgba(211, 47, 47, 0.22);
+        }
+
+        .bg-info {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--color-text);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .bg-secondary {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--color-text);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        .tab-switcher {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
         }
 
         .tab-button {
-            background: var(--color-gray-50) !important;
-            border: 2px solid rgba(0, 0, 0, 0.05) !important;
+            background: var(--color-white);
+            border: 1.5px solid rgba(0, 0, 0, 0.08);
             border-radius: var(--radius-md);
-            color: var(--color-ink) !important;
-        }
-
-        .tab-button.active {
-            background: var(--color-red) !important;
-            color: var(--color-white) !important;
-            border-color: var(--color-red) !important;
-        }
-
-        .tab-button:not(.active):hover {
-            border-color: var(--color-red) !important;
-            color: var(--color-red) !important;
-        }
-
-        .ticket-card,
-        .timeline-item,
-        .table-hover tbody tr {
+            padding: 1.35rem;
+            display: grid;
+            gap: 0.35rem;
+            text-align: left;
+            font-weight: 600;
             transition: var(--transition);
+        }
+
+        .tab-button i {
+            font-size: 1.4rem;
+            color: var(--color-red);
+        }
+
+        .tab-button:hover {
+            border-color: var(--color-red);
+        }
+
+        .tab-button.is-active {
+            border-color: var(--color-red);
+            color: var(--color-red);
+            box-shadow: 0 0 0 4px rgba(211, 47, 47, 0.15);
+        }
+
+        .tab-panel {
+            display: none;
+            animation: fadeIn 0.45s ease;
+        }
+
+        .tab-panel.is-active {
+            display: block;
+        }
+
+        .ticket-list {
+            display: grid;
+            gap: 1.25rem;
         }
 
         .ticket-card {
-            border: 2px solid rgba(0, 0, 0, 0.04);
-            border-left: 5px solid transparent;
+            background: var(--color-white);
+            border: 1.5px solid rgba(0, 0, 0, 0.08);
+            border-left: 5px solid rgba(211, 47, 47, 0.4);
             border-radius: var(--radius-md);
             padding: 1.5rem;
-            background: var(--color-white);
+            display: grid;
+            gap: 1rem;
+            transition: var(--transition);
         }
 
         .ticket-card:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-medium);
-            border-color: rgba(211, 47, 47, 0.35);
-        }
-
-        .ticket-priority-urgente { border-left-color: var(--color-red); }
-        .ticket-priority-alta { border-left-color: #ff8f70; }
-        .ticket-priority-media { border-left-color: var(--color-black); }
-        .ticket-priority-baja { border-left-color: var(--color-gray-300); }
-
-        .personal-card {
-            text-align: center;
-            padding: 2rem;
-            border: 2px solid rgba(0, 0, 0, 0.05);
-            border-radius: var(--radius-md);
-            background: var(--color-white);
-        }
-
-        .personal-card .fa-user-circle {
-            color: var(--color-red);
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            filter: drop-shadow(0 8px 24px rgba(211, 47, 47, 0.35));
-        }
-
-        .alert {
-            border-radius: var(--radius-md);
-            border: none;
-            padding: 1.5rem;
-            border-left: 5px solid var(--color-red);
-            background: linear-gradient(135deg, rgba(211, 47, 47, 0.08), rgba(211, 47, 47, 0.15));
-            color: var(--color-ink);
-        }
-
-        .table {
-            border-spacing: 0 12px;
-        }
-
-        .table thead th {
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            font-size: 0.75rem;
-            color: var(--color-gray-500);
-            border: none;
-            background: rgba(0, 0, 0, 0.03);
-            padding: 1rem;
-        }
-
-        .table tbody tr {
-            background: var(--color-white);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-soft);
-        }
-
-        .table tbody tr:hover {
             transform: translateY(-4px);
-            box-shadow: var(--shadow-medium);
+            border-color: var(--color-border-strong);
         }
 
-        .table tbody td {
-            border: none;
-            padding: 1.1rem 1rem;
-            vertical-align: middle;
-            color: var(--color-ink);
+        .ticket-card__header {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: space-between;
+            align-items: flex-start;
         }
 
-        .navbar-custom,
-        .navbar {
-            background: linear-gradient(135deg, var(--color-black) 0%, var(--color-graphite) 100%);
-            border-bottom: 4px solid var(--color-red);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        .ticket-card__title {
+            font-size: 1rem;
+            font-weight: 600;
         }
 
-        .navbar-brand,
-        .navbar-nav .nav-link {
-            color: rgba(255, 255, 255, 0.85) !important;
-            font-weight: 500;
-            transition: var(--transition);
+        .ticket-card__description {
+            color: var(--color-muted);
+            font-size: 0.9rem;
+            margin-top: 0.35rem;
         }
 
-        .navbar-nav .nav-link:hover,
-        .navbar-nav .nav-link.active {
-            color: var(--color-white) !important;
-        }
-
-        .navbar-toggler {
-            border-color: rgba(255, 255, 255, 0.35);
-        }
-
-        .navbar-toggler-icon {
-            filter: brightness(10);
-        }
-
-        .btn-floating {
-            width: 58px;
-            height: 58px;
-            border-radius: 50%;
+        .ticket-card__meta {
             display: grid;
-            place-items: center;
-            position: fixed;
-            bottom: 32px;
-            right: 32px;
-            z-index: 1020;
+            gap: 0.65rem;
+            text-align: right;
         }
 
-        .section { display: none; }
-        .section.active { display: block; animation: fadeUp 0.6s ease forwards; }
+        .ticket-card__date {
+            font-size: 0.85rem;
+            color: var(--color-muted);
+        }
 
-        .modal.fade .modal-dialog {
-            transform: translateY(30px);
+        .ticket-card__tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .ticket-priority-urgente {
+            border-left-color: var(--color-red);
+        }
+
+        .ticket-priority-alta {
+            border-left-color: rgba(211, 47, 47, 0.65);
+        }
+
+        .ticket-priority-media {
+            border-left-color: rgba(0, 0, 0, 0.25);
+        }
+
+        .ticket-priority-baja {
+            border-left-color: rgba(0, 0, 0, 0.15);
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .person-card {
+            border: 1.5px solid rgba(0, 0, 0, 0.08);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            background: var(--color-white);
+            display: grid;
+            gap: 0.65rem;
+            text-align: center;
             transition: var(--transition);
         }
 
-        .modal.show .modal-dialog {
-            transform: translateY(0);
+        .person-card:hover {
+            border-color: var(--color-border);
         }
 
-        .modal-content {
-            border-radius: var(--radius-lg);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: var(--shadow-medium);
+        .person-card__icon {
+            font-size: 2.75rem;
+            color: var(--color-red);
         }
 
-        .modal-header {
-            border-bottom: 3px solid var(--color-red);
-            background: linear-gradient(135deg, var(--color-black), var(--color-graphite));
+        .person-card__note {
+            font-size: 0.85rem;
+            color: var(--color-muted);
+        }
+
+        .welcome-banner {
+            background: var(--color-red);
             color: var(--color-white);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
         }
 
-        .modal-footer {
+        .welcome-banner__info {
+            display: grid;
+            gap: 0.4rem;
+        }
+
+        .welcome-banner__info h2 {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .info-banner {
+            border: 1.5px solid rgba(211, 47, 47, 0.35);
+            border-left: 6px solid var(--color-red);
+            background: rgba(211, 47, 47, 0.08);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .info-banner__icon {
+            font-size: 1.8rem;
+            color: var(--color-red);
+        }
+
+        .info-banner__content {
+            display: grid;
+            gap: 0.35rem;
+        }
+
+        .info-banner__content h4 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            z-index: 60;
+        }
+
+        .modal--visible {
+            display: flex;
+        }
+
+        .modal__dialog {
+            width: min(780px, 95vw);
+            background: var(--color-white);
+            border-radius: var(--radius-lg);
+            border: 1.5px solid var(--color-border);
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+
+        .modal__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            background: rgba(211, 47, 47, 0.08);
+        }
+
+        .modal__header h5 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .modal__body {
+            padding: 2rem;
+            overflow-y: auto;
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .modal__footer {
+            padding: 1.25rem 2rem;
             border-top: 1px solid rgba(0, 0, 0, 0.08);
-            background: var(--color-gray-50);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 0.75rem;
         }
 
-        .btn-close {
-            filter: brightness(10);
+        .detail-layout {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .detail-columns {
+            display: grid;
+            gap: 1.25rem;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        }
+
+        .detail-block {
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .detail-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .detail-grid {
+            display: grid;
+            gap: 0.85rem;
+        }
+
+        .detail-row {
+            display: grid;
+            gap: 0.35rem;
+        }
+
+        .detail-row span {
+            font-size: 0.85rem;
+            color: var(--color-muted);
+        }
+
+        .detail-row strong {
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .attachment-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
         }
 
         .timeline {
-            position: relative;
-            padding-left: 2rem;
+            display: grid;
+            gap: 0.85rem;
         }
 
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 0.45rem;
-            top: 0.5rem;
-            bottom: 0.5rem;
-            width: 2px;
-            background: linear-gradient(180deg, rgba(211, 47, 47, 0.45), transparent);
+        .timeline-item {
+            display: grid;
+            gap: 0.25rem;
+            border-left: 3px solid rgba(211, 47, 47, 0.25);
+            padding-left: 1rem;
         }
 
-        .timeline-marker {
-            width: 12px;
-            height: 12px;
-            background: var(--color-red);
+        .timeline-item h6 {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .timeline-item span {
+            font-size: 0.85rem;
+            color: var(--color-muted);
+        }
+
+        .btn-close {
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
-            box-shadow: 0 0 0 6px rgba(211, 47, 47, 0.1);
-            position: absolute;
-            left: -0.35rem;
-            top: 0.6rem;
-        }
-
-        .status-badge {
-            padding: 0.35rem 0.65rem;
-            border-radius: 999px;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .user-status {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 6px;
-        }
-
-        .status-disponible { background: #22c55e; }
-        .status-ocupado { background: #f59e0b; }
-        .status-ausente { background: #ef4444; }
-
-        .ticket-estado-abierto { background-color: rgba(21, 10, 255, 0.08); }
-        .ticket-estado-en_proceso { background-color: rgba(255, 193, 7, 0.12); }
-        .ticket-estado-resuelto { background-color: rgba(34, 197, 94, 0.12); }
-        .ticket-estado-cerrado.satisfactoria { background-color: rgba(34, 197, 94, 0.18); }
-        .ticket-estado-cerrado.insatisfactoria { background-color: rgba(239, 68, 68, 0.12); }
-
-        .auth-card {
-            background: rgba(255, 255, 255, 0.94);
-            border-radius: var(--radius-lg);
-            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(14px);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .auth-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(211, 47, 47, 0.15), transparent);
-            opacity: 0;
+            border: none;
+            background: rgba(0, 0, 0, 0.12);
+            color: var(--color-text);
+            cursor: pointer;
+            display: grid;
+            place-items: center;
             transition: var(--transition);
         }
 
-        .auth-card:hover::before {
-            opacity: 1;
+        .btn-close:hover {
+            background: rgba(211, 47, 47, 0.35);
+            color: var(--color-white);
         }
 
-        .hero-icon {
-            font-size: 3.6rem;
-            color: rgba(255, 255, 255, 0.18);
+        .toast-stack {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            display: grid;
+            gap: 0.75rem;
+            z-index: 70;
+            pointer-events: none;
         }
 
-        .fade-in {
-            animation: fadeUp 0.5s ease forwards;
+        .toast {
+            min-width: 260px;
+            max-width: 320px;
+            background: var(--color-white);
+            border: 1.5px solid rgba(0, 0, 0, 0.08);
+            border-left: 5px solid var(--color-red);
+            border-radius: var(--radius-md);
+            padding: 0.95rem 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            box-shadow: var(--shadow-soft);
+            animation: slideDown 0.45s ease;
+            pointer-events: auto;
         }
 
-        .slide-in-up {
-            animation: fadeUp 0.6s ease forwards;
+        .toast__message {
+            font-size: 0.9rem;
         }
 
-        @keyframes fadeUp {
+        .toast--success {
+            border-left-color: rgba(0, 0, 0, 0.45);
+        }
+
+        .toast--warning {
+            border-left-color: rgba(211, 47, 47, 0.35);
+        }
+
+        .toast--danger {
+            border-left-color: var(--color-red);
+        }
+
+        .toast__close {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0, 0, 0, 0.08);
+            color: var(--color-text);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .toast__close:hover {
+            background: rgba(211, 47, 47, 0.25);
+            color: var(--color-white);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--color-muted);
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .is-hidden {
+            display: none !important;
+        }
+
+        @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(16px);
             }
             to {
                 opacity: 1;
@@ -600,305 +757,347 @@ iniciarSesion();
             }
         }
 
-        @keyframes glow {
-            0%, 100% {
-                transform: scale(0.95);
-                opacity: 0.6;
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-12px);
             }
-            50% {
-                transform: scale(1.1);
+            to {
                 opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        @media (max-width: 992px) {
-            .header-main {
-                text-align: center;
-                padding: 3rem 0;
+        @media (max-width: 920px) {
+            .panel {
+                padding: 2rem;
             }
 
-            .hero-icon {
-                display: none;
+            .form-grid--two {
+                grid-template-columns: 1fr;
             }
 
-            .btn {
-                width: 100%;
+            .panel__header--inline {
+                flex-direction: column;
+                align-items: flex-start;
             }
 
-            .navbar-collapse {
-                background: rgba(0, 0, 0, 0.85);
-                border-radius: var(--radius-md);
-                padding: 1.5rem;
+            .welcome-banner__info h2 {
+                font-size: 1.6rem;
             }
 
-            .btn-floating {
-                right: 20px;
-                bottom: 20px;
+            .tab-switcher {
+                grid-template-columns: 1fr;
             }
         }
 
-        @media (max-width: 768px) {
-            .container,
-            .container-fluid {
-                width: min(95vw, 100%);
+        @media (max-width: 640px) {
+            .app-header {
+                padding: 1.15rem 1.5rem;
             }
 
-            .header-main {
-                padding: 2.5rem 0;
+            .brand-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 1.3rem;
             }
 
-            .card,
-            .main-card,
-            .card-dashboard {
-                padding: 0 1rem;
+            .panel {
+                padding: 1.75rem;
             }
 
-            .card-body {
-                padding: 1.5rem;
+            .modal__dialog {
+                padding: 0;
+            }
+
+            .modal__header,
+            .modal__body,
+            .modal__footer {
+                padding-inline: 1.5rem;
             }
         }
     </style>
 </head>
 <body>
-   
-<!-- Header Principal -->
-<div class="header-main">
-    <div class="container">
-        <div class="row align-items-center py-5">
-            <div class="col-lg-6">
-                <h1 class="mb-3" style="font-size: 3rem;">
-                    <i class="fas fa-headset me-3"></i>Centro de Soporte IT
-                </h1>
-                <p style="font-size: 1.15rem; opacity: 0.9;">Gestión integral de tickets de soporte técnico. Resuelve incidencias rápido y eficientemente.</p>
-                <div class="mt-4">
-                    <span class="badge bg-danger me-2 px-3 py-2" style="font-size: 0.85rem;"><i class="fas fa-lightning me-2"></i>Rápido y Confiable</span>
-                    <span class="badge bg-light text-dark px-3 py-2" style="font-size: 0.85rem;"><i class="fas fa-shield-alt me-2"></i>Seguro</span>
-                </div>
+    <header class="app-header">
+        <div class="app-header__brand">
+            <div class="brand-icon">
+                <i class="fas fa-headset"></i>
             </div>
-            <div class="col-lg-6 d-none d-lg-block text-end">
-                <i class="fas fa-headset" style="font-size: 8rem; opacity: 0.15;"></i>
+            <div>
+                <div class="app-header__title">Centro de Soporte IT</div>
+                <div class="app-header__subtitle">Gestión empresarial de incidencias</div>
             </div>
         </div>
-    </div>
-</div>
+        <div class="app-header__subtitle">Soporte eficiente, comunicación clara y seguimiento continuo</div>
+    </header>
 
-<!-- Contenido Principal -->
-<div class="container py-5">
-    <!-- Sección de Identificación -->
-    <div class="row justify-content-center mb-5" id="identificacionSection">
-        <div class="col-12 col-md-8 col-lg-6">
-            <div class="card main-card">
-                <div class="card-body p-5">
-                    <div class="text-center mb-4">
-                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #d32f2f, #b71c1c); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
-                            <i class="fas fa-user-circle fa-2x text-white"></i>
-                        </div>
-                        <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem;">Acceso al Sistema</h2>
-                        <p style="color: var(--text-light); margin: 0;">Ingresa tus datos para continuar</p>
-                    </div>
-
-                    <form id="formIdentificacion">
-                        <div class="mb-4">
-                            <label class="form-label">Número de Ficha</label>
-                            <div class="input-group input-group-lg">
-                                <span class="input-group-text"><i class="fas fa-id-card"></i></span>
-                                <input type="text" class="form-control" id="numeroFicha" placeholder="Ej: 12345" required>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label">Nombre Completo</label>
-                            <div class="input-group input-group-lg">
-                                <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                <input type="text" class="form-control" id="nombreCompleto" placeholder="Ej: Juan Pérez" required>
-                            </div>
-                        </div>
-
-                        <button type="button" class="btn btn-primary w-100 py-3 mb-3" onclick="accederSistema()" style="font-size: 1rem; font-weight: 600;">
-                            <i class="fas fa-arrow-right me-2"></i>Acceder al Sistema
-                        </button>
-                    </form>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem;">
-                        <button type="button" class="btn" style="background: #ffffff; color: var(--primary-color); border: 2px solid var(--primary-color); padding: 0.75rem; font-weight: 600;" onclick="mostrarFormularioTicket()">
-                            <i class="fas fa-plus me-2"></i>Nuevo Ticket
-                        </button>
-                        <a href="admin.php" class="btn" style="background: #ffffff; color: var(--text-dark); border: 2px solid var(--border-color); padding: 0.75rem; font-weight: 600; text-decoration: none;">
-                            <i class="fas fa-cog me-2"></i>Administración
-                        </a>
-                    </div>
+    <main class="app-main">
+        <div class="content-shell">
+            <section id="identificacionSection" class="panel panel--center">
+                <div class="panel__header">
+                    <h2>Identifícate para continuar</h2>
+                    <p class="panel__hint">Ingresa tu número de ficha y nombre completo para consultar o crear tickets.</p>
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Notificación Importante -->
-    <div class="row justify-content-center mb-5" id="alertSection">
-        <div class="col-12 col-md-8 col-lg-6">
-            <div class="alert alert-warning alert-dismissible fade show" role="alert" style="border-radius: 12px; border: none; border-left: 4px solid #f59e0b; padding: 1.5rem;">
-                <div class="d-flex">
-                    <div style="margin-right: 1rem;">
-                        <i class="fas fa-lightbulb fa-2x" style="color: #f59e0b;"></i>
+                <form id="formIdentificacion" class="form-grid" onsubmit="event.preventDefault(); accederSistema();">
+                    <div class="form-field">
+                        <label for="numeroFicha">Número de ficha</label>
+                        <input type="text" id="numeroFicha" placeholder="Ejemplo: 12345" required>
                     </div>
-                    <div>
-                        <h6 class="alert-heading" style="font-weight: 700; margin-bottom: 0.5rem;">Importante</h6>
-                        <p style="margin: 0; font-size: 0.95rem;">Usa exactamente la misma combinación de <strong>nombre y apellido</strong> con la que creaste tus tickets para verlos.</p>
+                    <div class="form-field">
+                        <label for="nombreCompleto">Nombre completo</label>
+                        <input type="text" id="nombreCompleto" placeholder="Nombre y apellido" required>
                     </div>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        </div>
-    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-arrow-right"></i>
+                        Acceder al sistema
+                    </button>
+                </form>
 
-    <!-- Contenido Dinámico - Dashboard -->
-    <div id="contenidoDinamico" style="display: none;">
-        <!-- Header del Usuario Logueado -->
-        <div style="background: linear-gradient(135deg, var(--text-dark) 0%, #2d2d2d 100%); border-radius: 12px; padding: 2rem; color: white; margin-bottom: 2rem;">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 style="font-size: 1.8rem; font-weight: 700; margin: 0;">Bienvenido</h2>
-                    <p id="usuarioNombre" style="font-size: 1.1rem; margin: 0.5rem 0 0 0; opacity: 0.9;"></p>
+                <div class="cta-grid">
+                    <button type="button" class="btn btn-outline" onclick="mostrarFormularioTicket()">
+                        <i class="fas fa-plus"></i>
+                        Crear nuevo ticket
+                    </button>
+                    <a href="admin.php" class="btn btn-ghost">
+                        <i class="fas fa-cog"></i>
+                        Panel administrativo
+                    </a>
                 </div>
-                <div style="text-align: right;">
-                    <button class="btn" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 0.75rem 1.5rem;" onclick="location.href='index.php'">
-                        <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+            </section>
+
+            <section id="alertSection" class="info-banner">
+                <div class="info-banner__icon">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <div class="info-banner__content">
+                    <h4>Importante</h4>
+                    <p>Utiliza exactamente la misma combinación de nombre y apellido con la que registraste tus tickets para visualizarlos correctamente.</p>
+                </div>
+                <button type="button" class="btn-close" aria-label="Cerrar aviso" onclick="document.getElementById('alertSection').classList.add('is-hidden');">
+                    <i class="fas fa-xmark"></i>
+                </button>
+            </section>
+
+            <section id="contenidoDinamico" class="dashboard-shell is-hidden">
+                <article class="welcome-banner">
+                    <div class="welcome-banner__info">
+                        <span>Bienvenido</span>
+                        <h2 id="usuarioNombre">Usuario</h2>
+                    </div>
+                    <button class="btn btn-ghost" type="button" onclick="window.location.href='index.php'">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Cerrar sesión
+                    </button>
+                </article>
+
+                <section class="panel">
+                    <div class="panel__header panel__header--inline">
+                        <h3><i class="fas fa-users"></i> Estado del personal IT</h3>
+                        <span class="panel__hint">Actualización automática cada 30 segundos</span>
+                    </div>
+                    <div class="panel__body">
+                        <div id="personalIT" class="status-grid"></div>
+                    </div>
+                </section>
+
+                <div class="tab-switcher">
+                    <button class="tab-button is-active" data-tab="tickets" onclick="mostrarTab('tickets', this)">
+                        <i class="fas fa-layer-group"></i>
+                        <span>Mis tickets</span>
+                    </button>
+                    <button class="tab-button" data-tab="nuevo" onclick="mostrarTab('nuevo', this)">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Nuevo ticket</span>
                     </button>
                 </div>
-            </div>
-        </div>
 
-        <!-- Estado del Personal IT -->
-        <div style="margin-bottom: 3rem;">
-            <h3 style="font-weight: 700; margin-bottom: 1.5rem;"><i class="fas fa-users me-2"></i>Estado del Personal IT</h3>
-            <div class="row" id="personalIT" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
-                <!-- Se llena dinámicamente -->
-            </div>
-        </div>
-
-        <!-- Tabs de Navegación -->
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem;">
-            <button class="btn tab-button active" data-tab="tickets" onclick="mostrarTab('tickets', this)" style="text-align: left; background: white; border: 2px solid var(--primary-color); color: var(--primary-color); padding: 1.5rem; border-radius: 12px; font-weight: 700; cursor: pointer;">
-                <i class="fas fa-list" style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;"></i>
-                Mis Tickets
-            </button>
-            <button class="btn tab-button" data-tab="nuevo" onclick="mostrarTab('nuevo', this)" style="text-align: left; background: white; border: 2px solid var(--border-color); color: var(--text-dark); padding: 1.5rem; border-radius: 12px; font-weight: 700; cursor: pointer;">
-                <i class="fas fa-plus" style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;"></i>
-                Nuevo Ticket
-            </button>
-        </div>
-
-        <!-- Mis Tickets -->
-        <div id="tickets" class="tab-content-main" style="display: block;">
-            <div class="card main-card">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h3 style="font-weight: 700; margin: 0;"><i class="fas fa-list me-2"></i>Mis Tickets</h3>
-                        <div style="display: flex; gap: 0.75rem; align-items: center;">
-                            <button class="btn btn-outline-primary btn-sm active" onclick="filtrarTicketsPorFecha('todos')" style="border-radius: 20px; padding: 0.5rem 1rem;">
-                                <i class="fas fa-list me-1"></i>Todos
-                            </button>
-                            <button class="btn btn-outline-primary btn-sm" onclick="filtrarTicketsPorFecha('mes_actual')" style="border-radius: 20px; padding: 0.5rem 1rem;">
-                                <i class="fas fa-calendar-day me-1"></i>Este Mes
-                            </button>
-                            <span class="badge bg-primary px-3 py-2" id="totalTickets" style="font-size: 0.9rem;">0</span>
+                <section id="tickets" class="panel tab-panel is-active">
+                    <div class="panel__header panel__header--inline">
+                        <h3><i class="fas fa-clipboard-list"></i> Mis tickets</h3>
+                        <div class="filter-group" style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+                            <button class="btn btn-chip is-active" onclick="filtrarTicketsPorFecha('todos', event)">Todos</button>
+                            <button class="btn btn-chip" onclick="filtrarTicketsPorFecha('mes_actual', event)">Este mes</button>
+                            <span class="badge bg-primary" id="totalTickets">0</span>
                         </div>
                     </div>
-                    <div id="listaTickets">
-                        <!-- Se llena dinámicamente -->
+                    <div class="panel__body">
+                        <div id="listaTickets" class="ticket-list"></div>
                     </div>
-                </div>
-            </div>
-        </div>
+                </section>
 
-        <!-- Nuevo Ticket -->
-        <div id="nuevo" class="tab-content-main" style="display: none;">
-            <div class="card main-card">
-                <div class="card-body p-4">
-                    <h3 style="font-weight: 700; margin-bottom: 1.5rem;"><i class="fas fa-plus me-2"></i>Crear Nuevo Ticket</h3>
-
-                    <form id="formNuevoTicket">
-                        <div class="row">
-                            <div class="col-md-6 mb-4">
-                                <label class="form-label">Título del Problema *</label>
-                                <input type="text" class="form-control" id="titulo" placeholder="Describe brevemente el problema" required>
+                <section id="nuevo" class="panel tab-panel">
+                    <div class="panel__header">
+                        <h3><i class="fas fa-ticket"></i> Crear nuevo ticket</h3>
+                        <p class="panel__hint">Describe el incidente con la mayor precisión posible y adjunta archivos si es necesario.</p>
+                    </div>
+                    <div class="panel__body">
+                        <form id="formNuevoTicket" class="form-grid form-grid--two">
+                            <div class="form-field">
+                                <label for="titulo">Título del problema *</label>
+                                <input type="text" id="titulo" placeholder="Describe brevemente el problema" required>
                             </div>
-                            <div class="col-md-6 mb-4">
-                                <label class="form-label">Prioridad</label>
-                                <select class="form-select" id="prioridad">
+                            <div class="form-field">
+                                <label for="prioridad">Prioridad</label>
+                                <select id="prioridad">
                                     <option value="baja">Baja</option>
                                     <option value="media" selected>Media</option>
                                     <option value="alta">Alta</option>
                                     <option value="urgente">Urgente</option>
                                 </select>
                             </div>
-                        </div>
+                            <div class="form-field" style="grid-column: 1 / -1;">
+                                <label for="categoria">Categoría</label>
+                                <select id="categoria">
+                                    <option value="Hardware">Hardware</option>
+                                    <option value="Software">Software</option>
+                                    <option value="Red">Red / Conectividad</option>
+                                    <option value="Email">Email</option>
+                                    <option value="Impresoras">Impresoras</option>
+                                    <option value="Accesos">Accesos / Permisos</option>
+                                    <option value="Desarrollo">Desarrollo</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                            </div>
+                            <div class="form-field" style="grid-column: 1 / -1;">
+                                <label for="descripcion">Descripción detallada *</label>
+                                <textarea id="descripcion" placeholder="Incluye pasos, mensajes de error y cualquier dato relevante" required></textarea>
+                            </div>
+                            <div class="form-field" style="grid-column: 1 / -1;">
+                                <label for="archivos">Archivos adjuntos</label>
+                                <input type="file" id="archivos" multiple accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.txt">
+                                <span class="panel__hint">Máximo 5MB por archivo · Formatos permitidos: JPG, PNG, PDF, DOC, DOCX, TXT</span>
+                            </div>
+                            <div class="cta-grid" style="grid-column: 1 / -1;">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-check"></i>
+                                    Registrar ticket
+                                </button>
+                                <button type="button" class="btn btn-ghost" onclick="mostrarTab('tickets')">
+                                    <i class="fas fa-arrow-left"></i>
+                                    Volver a mis tickets
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+            </section>
+        </div>
+    </main>
 
-                        <div class="mb-4">
-                            <label class="form-label">Categoría</label>
-                            <select class="form-select" id="categoria">
-                                <option value="Hardware">Hardware</option>
-                                <option value="Software">Software</option>
-                                <option value="Red">Red/Conectividad</option>
-                                <option value="Email">Email</option>
-                                <option value="Impresoras">Impresoras</option>
-                                <option value="Accesos">Accesos/Permisos</option>
-                                <option value="Desarrollo">Desarrollo</option>
-                                <option value="Otro">Otro</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label">Descripción Detallada *</label>
-                            <textarea class="form-control" id="descripcion" rows="5" required placeholder="Describe el problema con la mayor detalle posible..."></textarea>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label">Archivos Adjuntos (opcional)</label>
-                            <input type="file" class="form-control" id="archivos" multiple accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.txt">
-                            <small style="color: var(--text-light); display: block; margin-top: 0.5rem;">Máximo 5MB por archivo. Formatos permitidos: JPG, PNG, PDF, DOC, DOCX, TXT</small>
-                        </div>
-
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                            <button type="submit" class="btn btn-primary" style="padding: 0.75rem; font-weight: 600;">
-                                <i class="fas fa-check-circle me-2"></i>Crear Ticket
-                            </button>
-                            <button type="button" class="btn" style="background: #ffffff; color: var(--text-dark); border: 1px solid var(--border-color); padding: 0.75rem; font-weight: 600;" onclick="mostrarTab('tickets', document.querySelector('[data-tab=tickets]'))">
-                                <i class="fas fa-times-circle me-2"></i>Cancelar
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+    <div class="modal" id="modalVerTicket" aria-hidden="true">
+        <div class="modal__dialog">
+            <header class="modal__header">
+                <h5 id="modalTicketTitle"></h5>
+                <button type="button" class="btn-close" data-modal-close aria-label="Cerrar">
+                    <i class="fas fa-xmark"></i>
+                </button>
+            </header>
+            <div class="modal__body" id="modalTicketBody"></div>
+            <footer class="modal__footer" id="modalTicketFooter"></footer>
         </div>
     </div>
 
-    <!-- Modal Ver Ticket -->
-    <div class="modal fade" id="modalVerTicket" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="modalTicketTitle"></h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" id="modalTicketBody">
-                    <!-- Contenido dinámico -->
-                </div>
-                <div class="modal-footer" id="modalTicketFooter">
-                    <!-- Botones dinámicos -->
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="toast-stack" id="toastStack"></div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
+        (function() {
+            const modalRegistry = new WeakMap();
+
+            class Modal {
+                constructor(element) {
+                    if (modalRegistry.has(element)) {
+                        return modalRegistry.get(element);
+                    }
+
+                    this.element = element;
+                    this.dialog = element.querySelector('.modal__dialog');
+                    this.bindEvents();
+                    modalRegistry.set(element, this);
+                }
+
+                bindEvents() {
+                    this.element.addEventListener('click', (event) => {
+                        if (event.target === this.element) {
+                            this.hide();
+                        }
+                    });
+
+                    this.element.querySelectorAll('[data-modal-close]').forEach(btn => {
+                        btn.addEventListener('click', () => this.hide());
+                    });
+                }
+
+                show() {
+                    this.element.classList.add('modal--visible');
+                    this.element.setAttribute('aria-hidden', 'false');
+                    document.body.classList.add('modal-open');
+                }
+
+                hide() {
+                    this.element.classList.remove('modal--visible');
+                    this.element.setAttribute('aria-hidden', 'true');
+                    document.body.classList.remove('modal-open');
+                }
+
+                static getInstance(element) {
+                    return modalRegistry.get(element) || new Modal(element);
+                }
+            }
+
+            window.bootstrap = window.bootstrap || {};
+            window.bootstrap.Modal = Modal;
+        })();
+
+        const toastStack = document.getElementById('toastStack');
+        const sections = {
+            identificacion: document.getElementById('identificacionSection'),
+            alerta: document.getElementById('alertSection'),
+            dashboard: document.getElementById('contenidoDinamico')
+        };
+        const usuarioNombre = document.getElementById('usuarioNombre');
+        const personalITContainer = document.getElementById('personalIT');
+        const listaTickets = document.getElementById('listaTickets');
+        const totalTickets = document.getElementById('totalTickets');
+        const formNuevoTicket = document.getElementById('formNuevoTicket');
+        const numeroFichaInput = document.getElementById('numeroFicha');
+        const nombreCompletoInput = document.getElementById('nombreCompleto');
+
         let usuarioActual = null;
+        let todosLosTickets = [];
+
+        function mostrarMensaje(mensaje, tipo = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast--${tipo}`;
+            toast.innerHTML = `
+                <span class="toast__message">${mensaje}</span>
+                <button type="button" class="toast__close" aria-label="Cerrar"><i class="fas fa-xmark"></i></button>
+            `;
+
+            const cerrar = () => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-10px)';
+                setTimeout(() => toast.remove(), 250);
+            };
+
+            toast.querySelector('.toast__close').addEventListener('click', cerrar);
+            toastStack.appendChild(toast);
+
+            setTimeout(cerrar, 5000);
+        }
+
+        function activarDashboard() {
+            sections.dashboard.classList.remove('is-hidden');
+            sections.identificacion.classList.add('is-hidden');
+            sections.alerta.classList.add('is-hidden');
+        }
 
         async function verificarNombresSimilares(numeroFicha, nombreCompleto) {
             try {
                 const response = await fetch(`api/tickets_publico.php?action=verificar-nombre&numero_ficha=${numeroFicha}&nombre=${encodeURIComponent(nombreCompleto)}`);
                 const data = await response.json();
-                
+
                 if (data.success && data.sugerencia) {
                     return data.sugerencia;
                 }
@@ -910,20 +1109,19 @@ iniciarSesion();
         }
 
         async function accederSistema() {
-            const numeroFicha = document.getElementById('numeroFicha').value.trim();
-            const nombreCompleto = document.getElementById('nombreCompleto').value.trim();
+            const numeroFicha = numeroFichaInput.value.trim();
+            let nombreCompleto = nombreCompletoInput.value.trim();
 
             if (!numeroFicha || !nombreCompleto) {
-                mostrarMensaje('Por favor completa todos los campos', 'warning');
+                mostrarMensaje('Por favor completa todos los campos requeridos', 'warning');
                 return;
             }
 
-            // Verificar nombres similares
             const sugerencia = await verificarNombresSimilares(numeroFicha, nombreCompleto);
-            if (sugerencia) {
+            if (sugerencia && sugerencia !== nombreCompleto) {
                 if (confirm(`¿Quizás quisiste decir "${sugerencia}"?`)) {
-                    document.getElementById('nombreCompleto').value = sugerencia;
                     nombreCompleto = sugerencia;
+                    nombreCompletoInput.value = sugerencia;
                 }
             }
 
@@ -932,41 +1130,34 @@ iniciarSesion();
                 nombre: nombreCompleto
             };
 
-            // Actualizar el nombre mostrado en el header de bienvenida
-            document.getElementById('usuarioNombre').innerHTML = `<strong>${nombreCompleto}</strong> | Ficha: ${numeroFicha}`;
-
-            document.getElementById('contenidoDinamico').style.display = 'block';
-            document.getElementById('identificacionSection').style.display = 'none';
-            document.getElementById('alertSection').style.display = 'none';
-
+            usuarioNombre.innerHTML = `<strong>${nombreCompleto}</strong> · Ficha ${numeroFicha}`;
+            activarDashboard();
+            mostrarTab('tickets');
             cargarTicketsUsuario();
             cargarPersonalIT();
         }
 
-        // Función para cambiar entre tabs
-        function mostrarTab(tabName, btnElement) {
-            // Ocultar todos los tabs
-            document.querySelectorAll('.tab-content-main').forEach(el => el.style.display = 'none');
+        function mostrarTab(tabName, trigger) {
+            const panel = document.getElementById(tabName);
+            const button = trigger || document.querySelector(`[data-tab="${tabName}"]`);
 
-            // Mostrar el tab seleccionado
-            document.getElementById(tabName).style.display = 'block';
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('is-active'));
+            document.querySelectorAll('.tab-panel').forEach(section => section.classList.remove('is-active'));
 
-            // Actualizar estado de botones
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.style.borderColor = 'var(--border-color)';
-                btn.style.color = 'var(--text-dark)';
-            });
-
-            btnElement.style.borderColor = 'var(--primary-color)';
-            btnElement.style.color = 'var(--primary-color)';
+            if (panel) {
+                panel.classList.add('is-active');
+            }
+            if (button) {
+                button.classList.add('is-active');
+            }
         }
 
         function mostrarFormularioTicket() {
-            const numeroFicha = document.getElementById('numeroFicha').value.trim();
-            const nombreCompleto = document.getElementById('nombreCompleto').value.trim();
+            const numeroFicha = numeroFichaInput.value.trim();
+            const nombreCompleto = nombreCompletoInput.value.trim();
 
             if (!numeroFicha || !nombreCompleto) {
-                mostrarMensaje('Por favor completa tu número de ficha y nombre antes de crear un ticket', 'warning');
+                mostrarMensaje('Ingresa tu número de ficha y nombre antes de crear un ticket', 'warning');
                 return;
             }
 
@@ -975,16 +1166,9 @@ iniciarSesion();
                 nombre: nombreCompleto
             };
 
-            // Actualizar el nombre mostrado en el header de bienvenida
-            document.getElementById('usuarioNombre').innerHTML = `<strong>${nombreCompleto}</strong> | Ficha: ${numeroFicha}`;
-
-            document.getElementById('contenidoDinamico').style.display = 'block';
-            document.getElementById('identificacionSection').style.display = 'none';
-            document.getElementById('alertSection').style.display = 'none';
-
-            // Activar tab de nuevo ticket
-            mostrarTab('nuevo', document.querySelector('[data-tab="nuevo"]'));
-
+            usuarioNombre.innerHTML = `<strong>${nombreCompleto}</strong> · Ficha ${numeroFicha}`;
+            activarDashboard();
+            mostrarTab('nuevo');
             cargarPersonalIT();
         }
 
@@ -992,7 +1176,7 @@ iniciarSesion();
             try {
                 const response = await fetch('api/tickets_publico.php?action=personal-it');
                 const data = await response.json();
-                
+
                 if (data.success) {
                     mostrarPersonalIT(data.data);
                 }
@@ -1002,97 +1186,106 @@ iniciarSesion();
         }
 
         function mostrarPersonalIT(personal) {
-            const container = document.getElementById('personalIT');
-
-            container.innerHTML = personal.map(persona => `
-                <div class="col-md-4 col-lg-3 mb-3">
-                    <div class="personal-card">
-                        <i class="fas fa-user-circle fa-3x mb-3"></i>
-                        <h6 class="mb-3">${persona.nombre}</h6>
-                        <span class="badge bg-${obtenerColorEstadoIT(persona.estado)} px-3 py-2">
-                            <i class="fas fa-circle me-2" style="font-size: 8px;"></i>
-                            ${persona.estado.charAt(0).toUpperCase() + persona.estado.slice(1)}
-                        </span>
-                        ${persona.tickets_activos > 0 ? `<small class="d-block mt-3" style="color: var(--text-light);">${persona.tickets_activos} ticket(s) activo(s)</small>` : ''}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function obtenerColorEstadoIT(estado) {
-            switch(estado) {
-                case 'disponible': return 'success';
-                case 'ocupado': return 'warning';
-                case 'ausente': return 'danger';
-                default: return 'secondary';
-            }
-        }
-
-        async function cargarTicketsUsuario() {
-            if (!usuarioActual) return;
-            
-            try {
-                const response = await fetch(`api/tickets_publico.php?action=mis-tickets&numero_ficha=${usuarioActual.numeroFicha}&nombre=${encodeURIComponent(usuarioActual.nombre)}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    mostrarTickets(data.data);
-                } else {
-                    mostrarMensaje(data.message || 'Error al cargar tickets', 'danger');
-                }
-            } catch (error) {
-                mostrarMensaje('Error de conexión', 'danger');
-            }
-        }
-
-        let todosLosTickets = []; // Variable global para almacenar todos los tickets
-
-        function mostrarTickets(tickets) {
-            todosLosTickets = tickets; // Guardar los tickets para filtrado posterior
-            const container = document.getElementById('listaTickets');
-            const total = document.getElementById('totalTickets');
-
-            total.textContent = tickets.length;
-
-            if (tickets.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-4">
-                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">No tienes tickets creados</p>
+            if (!personal || personal.length === 0) {
+                personalITContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-user-slash" style="font-size:2rem;"></i>
+                        <p>No hay personal registrado en este momento.</p>
                     </div>
                 `;
                 return;
             }
 
-            container.innerHTML = tickets.map(ticket => `
-                <div class="card ticket-card ticket-priority-${ticket.prioridad} mb-3" data-fecha="${ticket.fecha_creacion}">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <h6 class="card-title mb-1">#${ticket.id} - ${ticket.titulo}</h6>
-                                <p class="card-text text-muted mb-2">${ticket.descripcion.substring(0, 100)}...</p>
-                                <div class="d-flex flex-wrap gap-2">
-                                    <span class="badge bg-${obtenerColorPrioridad(ticket.prioridad)}">${ticket.prioridad.toUpperCase()}</span>
-                                    <span class="badge bg-${obtenerColorEstado(ticket.estado)}">${ticket.estado.replace('_', ' ').toUpperCase()}</span>
-                                    <span class="badge bg-secondary">${ticket.categoria}</span>
-                                </div>
-                            </div>
-                            <div class="col-md-4 text-end">
-                                <small class="text-muted d-block mb-2">${formatearFecha(ticket.fecha_creacion)}</small>
-                                <button class="btn btn-outline-primary btn-sm" onclick="verTicket(${ticket.id})">
-                                    <i class="fas fa-eye me-1"></i>Ver Detalles
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            personalITContainer.innerHTML = personal.map(persona => `
+                <article class="person-card">
+                    <div class="person-card__icon"><i class="fas fa-user-circle"></i></div>
+                    <h6>${persona.nombre}</h6>
+                    <span class="badge bg-${obtenerColorEstadoIT(persona.estado)}">
+                        ${persona.estado.charAt(0).toUpperCase() + persona.estado.slice(1)}
+                    </span>
+                    ${persona.tickets_activos > 0 ? `<span class="person-card__note">${persona.tickets_activos} ticket(s) activo(s)</span>` : ''}
+                </article>
             `).join('');
         }
 
-        function filtrarTicketsPorFecha(filtro) {
-            // Actualizar botones activos
-            event.target.parentNode.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+        function obtenerColorEstadoIT(estado) {
+            switch(estado) {
+                case 'disponible':
+                    return 'success';
+                case 'ocupado':
+                    return 'warning';
+                case 'ausente':
+                    return 'danger';
+                default:
+                    return 'secondary';
+            }
+        }
+
+        async function cargarTicketsUsuario() {
+            if (!usuarioActual) return;
+
+            try {
+                const response = await fetch(`api/tickets_publico.php?action=mis-tickets&numero_ficha=${usuarioActual.numeroFicha}&nombre=${encodeURIComponent(usuarioActual.nombre)}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    mostrarTickets(data.data);
+                } else {
+                    mostrarMensaje(data.message || 'No fue posible cargar los tickets', 'danger');
+                }
+            } catch (error) {
+                mostrarMensaje('Error de conexión al cargar los tickets', 'danger');
+            }
+        }
+
+        function mostrarTickets(tickets) {
+            todosLosTickets = tickets || [];
+            totalTickets.textContent = todosLosTickets.length;
+
+            if (!todosLosTickets.length) {
+                listaTickets.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox" style="font-size:2.2rem;"></i>
+                        <p>No tienes tickets registrados todavía.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listaTickets.innerHTML = todosLosTickets.map(ticket => `
+                <article class="ticket-card ticket-priority-${ticket.prioridad}" data-fecha="${ticket.fecha_creacion}">
+                    <div class="ticket-card__header">
+                        <div>
+                            <h6 class="ticket-card__title">#${ticket.id} · ${ticket.titulo}</h6>
+                            <p class="ticket-card__description">${ticket.descripcion.substring(0, 120)}...</p>
+                        </div>
+                        <div class="ticket-card__meta">
+                            <time class="ticket-card__date">${formatearFecha(ticket.fecha_creacion)}</time>
+                            <button class="btn btn-outline btn-sm" onclick="verTicket(${ticket.id})">
+                                <i class="fas fa-eye"></i>
+                                Ver detalle
+                            </button>
+                        </div>
+                    </div>
+                    <div class="ticket-card__tags">
+                        <span class="badge bg-${obtenerColorPrioridad(ticket.prioridad)}">${ticket.prioridad.toUpperCase()}</span>
+                        <span class="badge bg-${obtenerColorEstado(ticket.estado)}">${ticket.estado.replace('_', ' ').toUpperCase()}</span>
+                        <span class="badge badge-soft">${ticket.categoria}</span>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        function filtrarTicketsPorFecha(filtro, event) {
+            if (event) {
+                const buttons = event.currentTarget.parentElement.querySelectorAll('.btn-chip');
+                buttons.forEach(btn => btn.classList.remove('is-active'));
+                event.currentTarget.classList.add('is-active');
+            }
+
+            if (!todosLosTickets.length) {
+                return;
+            }
 
             const ahora = new Date();
             const mesActual = ahora.getMonth();
@@ -1107,123 +1300,106 @@ iniciarSesion();
                 });
             }
 
-            // Actualizar contador y mostrar tickets filtrados
-            const total = document.getElementById('totalTickets');
-            total.textContent = ticketsFiltrados.length;
+            totalTickets.textContent = ticketsFiltrados.length;
 
-            const container = document.getElementById('listaTickets');
-
-            if (ticketsFiltrados.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-4">
-                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">No hay tickets ${filtro === 'mes_actual' ? 'para este mes' : ''}</p>
+            if (!ticketsFiltrados.length) {
+                listaTickets.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox" style="font-size:2.2rem;"></i>
+                        <p>No hay tickets registrados en el periodo seleccionado.</p>
                     </div>
                 `;
                 return;
             }
 
-            container.innerHTML = ticketsFiltrados.map(ticket => `
-                <div class="card ticket-card ticket-priority-${ticket.prioridad} mb-3" data-fecha="${ticket.fecha_creacion}">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <h6 class="card-title mb-1">#${ticket.id} - ${ticket.titulo}</h6>
-                                <p class="card-text text-muted mb-2">${ticket.descripcion.substring(0, 100)}...</p>
-                                <div class="d-flex flex-wrap gap-2">
-                                    <span class="badge bg-${obtenerColorPrioridad(ticket.prioridad)}">${ticket.prioridad.toUpperCase()}</span>
-                                    <span class="badge bg-${obtenerColorEstado(ticket.estado)}">${ticket.estado.replace('_', ' ').toUpperCase()}</span>
-                                    <span class="badge bg-secondary">${ticket.categoria}</span>
-                                </div>
-                            </div>
-                            <div class="col-md-4 text-end">
-                                <small class="text-muted d-block mb-2">${formatearFecha(ticket.fecha_creacion)}</small>
-                                <button class="btn btn-outline-primary btn-sm" onclick="verTicket(${ticket.id})">
-                                    <i class="fas fa-eye me-1"></i>Ver Detalles
-                                </button>
-                            </div>
+            listaTickets.innerHTML = ticketsFiltrados.map(ticket => `
+                <article class="ticket-card ticket-priority-${ticket.prioridad}" data-fecha="${ticket.fecha_creacion}">
+                    <div class="ticket-card__header">
+                        <div>
+                            <h6 class="ticket-card__title">#${ticket.id} · ${ticket.titulo}</h6>
+                            <p class="ticket-card__description">${ticket.descripcion.substring(0, 120)}...</p>
+                        </div>
+                        <div class="ticket-card__meta">
+                            <time class="ticket-card__date">${formatearFecha(ticket.fecha_creacion)}</time>
+                            <button class="btn btn-outline btn-sm" onclick="verTicket(${ticket.id})">
+                                <i class="fas fa-eye"></i>
+                                Ver detalle
+                            </button>
                         </div>
                     </div>
-                </div>
+                    <div class="ticket-card__tags">
+                        <span class="badge bg-${obtenerColorPrioridad(ticket.prioridad)}">${ticket.prioridad.toUpperCase()}</span>
+                        <span class="badge bg-${obtenerColorEstado(ticket.estado)}">${ticket.estado.replace('_', ' ').toUpperCase()}</span>
+                        <span class="badge badge-soft">${ticket.categoria}</span>
+                    </div>
+                </article>
             `).join('');
         }
 
-    // Reemplaza la función del formulario en index.php (línea ~348-380)
-document.getElementById('formNuevoTicket').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    if (!usuarioActual) {
-        mostrarMensaje('Error: Datos de usuario no encontrados', 'danger');
-        return;
-    }
-    
-    // Crear FormData para incluir archivos
-    const formData = new FormData();
-    formData.append('numero_ficha', usuarioActual.numeroFicha);
-    formData.append('nombre', usuarioActual.nombre);
-    formData.append('titulo', document.getElementById('titulo').value);
-    formData.append('descripcion', document.getElementById('descripcion').value);
-    formData.append('prioridad', document.getElementById('prioridad').value);
-    formData.append('categoria', document.getElementById('categoria').value);
-    
-    // Agregar archivos si existen
-    const archivos = document.getElementById('archivos').files;
-    for (let i = 0; i < archivos.length; i++) {
-        formData.append('archivos[]', archivos[i]);
-    }
-    
-    try {
-        const response = await fetch('api/tickets_publico.php?action=crear', {
-            method: 'POST',
-            body: formData  // Usar FormData en lugar de JSON
+        formNuevoTicket.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            if (!usuarioActual) {
+                mostrarMensaje('Error: no se encontraron datos del usuario activo', 'danger');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('numero_ficha', usuarioActual.numeroFicha);
+            formData.append('nombre', usuarioActual.nombre);
+            formData.append('titulo', document.getElementById('titulo').value);
+            formData.append('descripcion', document.getElementById('descripcion').value);
+            formData.append('prioridad', document.getElementById('prioridad').value);
+            formData.append('categoria', document.getElementById('categoria').value);
+
+            const archivos = document.getElementById('archivos').files;
+            for (let i = 0; i < archivos.length; i++) {
+                formData.append('archivos[]', archivos[i]);
+            }
+
+            try {
+                const response = await fetch('api/tickets_publico.php?action=crear', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    mostrarMensaje('Ticket creado exitosamente', 'success');
+
+                    const titulo = document.getElementById('titulo').value;
+                    const categoria = document.getElementById('categoria').value;
+                    const prioridad = document.getElementById('prioridad').value;
+                    const notificationTitle = `Nuevo ticket · ${prioridad.toUpperCase()}`;
+                    const notificationBody = `${categoria} · ${usuarioActual.nombre} · ${titulo}`;
+                    sendTicketNotification(notificationTitle, notificationBody, {
+                        ticket_id: data.ticket_id,
+                        action: 'new_ticket'
+                    });
+
+                    formNuevoTicket.reset();
+                    mostrarTab('tickets');
+                    cargarTicketsUsuario();
+                } else {
+                    mostrarMensaje(data.message || 'Error al crear el ticket', 'danger');
+                    console.error('Detalle del error:', data);
+                }
+            } catch (error) {
+                mostrarMensaje('Error de conexión', 'danger');
+                console.error('Error:', error);
+            }
         });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            mostrarMensaje('Ticket creado exitosamente', 'success');
-            
-            // 🔔 ENVIAR NOTIFICACIÓN USANDO EL MÉTODO QUE FUNCIONA (ANTES del reset)
-            const titulo = document.getElementById('titulo').value;
-            const categoria = document.getElementById('categoria').value;
-            const prioridad = document.getElementById('prioridad').value;
-            const nombreSolicitante = usuarioActual.nombre;
-            
-            const notificationTitle = `🎫 Nuevo Ticket - ${prioridad.toUpperCase()}`;
-            const notificationBody = `📁 ${categoria} - ${nombreSolicitante} - ${titulo}`;
-            
-            console.log('📧 Enviando notificación automática para ticket:', data.ticket_id);
-            sendTicketNotification(notificationTitle, notificationBody, {
-                ticket_id: data.ticket_id,
-                action: 'new_ticket'
-            });
-            
-            // Resetear formulario DESPUÉS de obtener los datos
-            document.getElementById('formNuevoTicket').reset();
-            
-            // Cambiar a la pestaña de tickets y recargar
-            const ticketsTab = new bootstrap.Tab(document.getElementById('tickets-tab'));
-            ticketsTab.show();
-            cargarTicketsUsuario();
-        } else {
-            mostrarMensaje(data.message || 'Error al crear el ticket', 'danger');
-            console.error('Error detallado:', data);
-        }
-    } catch (error) {
-        mostrarMensaje('Error de conexión', 'danger');
-        console.error('Error:', error);
-    }
-});
 
         async function verTicket(ticketId) {
             try {
                 const response = await fetch(`api/tickets_publico.php?action=detalle&id=${ticketId}`);
                 const data = await response.json();
-                
+
                 if (data.success) {
                     mostrarDetalleTicket(data.data);
                 } else {
-                    mostrarMensaje(data.message || 'Error al cargar el ticket', 'danger');
+                    mostrarMensaje(data.message || 'No fue posible cargar el ticket', 'danger');
                 }
             } catch (error) {
                 mostrarMensaje('Error de conexión', 'danger');
@@ -1231,68 +1407,126 @@ document.getElementById('formNuevoTicket').addEventListener('submit', async func
         }
 
         function mostrarDetalleTicket(ticket) {
-            const modal = document.getElementById('modalVerTicket');
+            const modalElement = document.getElementById('modalVerTicket');
             const title = document.getElementById('modalTicketTitle');
             const body = document.getElementById('modalTicketBody');
             const footer = document.getElementById('modalTicketFooter');
-            
-            title.innerHTML = `Ticket #${ticket.id} - ${ticket.titulo}`;
-            
-            let archivosHtml = '';
-            if (ticket.archivos && ticket.archivos.length > 0) {
-                archivosHtml = `
-                    <tr><td colspan="2"><strong>Archivos adjuntos:</strong></td></tr>
-                    <tr><td colspan="2">
+
+            title.textContent = `Ticket #${ticket.id} · ${ticket.titulo}`;
+
+            const history = [];
+            history.push({ label: 'Ticket creado', value: formatearFecha(ticket.fecha_creacion) });
+            if (ticket.asignado_nombre) {
+                history.push({ label: 'Asignado', value: `Atiende: ${ticket.asignado_nombre}` });
+            }
+            if (ticket.fecha_resolucion) {
+                history.push({ label: 'Resuelto', value: formatearFecha(ticket.fecha_resolucion) });
+            }
+            if (ticket.estado === 'cerrado' && ticket.satisfaccion) {
+                history.push({ label: 'Cierre', value: `Satisfacción: ${ticket.satisfaccion.toUpperCase()}` });
+            }
+
+            const archivosHtml = ticket.archivos && ticket.archivos.length ? `
+                <section class="detail-block">
+                    <h6 class="detail-title">Archivos adjuntos</h6>
+                    <div class="attachment-group">
                         ${ticket.archivos.map(archivo => `
-                            <a href="uploads/${archivo.ruta_archivo}" target="_blank" class="btn btn-sm btn-outline-primary me-2 mb-1">
-                                <i class="fas fa-paperclip me-1"></i>${archivo.nombre_archivo}
+                            <a class="btn btn-outline btn-sm" href="uploads/${archivo.ruta_archivo}" target="_blank">
+                                <i class="fas fa-paperclip"></i>
+                                ${archivo.nombre_archivo}
                             </a>
                         `).join('')}
-                    </td></tr>
-                `;
-            }
-            
+                    </div>
+                </section>
+            ` : '';
+
             body.innerHTML = `
-                <div class="row">
-                    <div class="col-md-6">
-                        <table class="table table-borderless">
-                            <tr><td><strong>Título:</strong></td><td>${ticket.titulo}</td></tr>
-                            <tr><td><strong>Descripción:</strong></td><td>${ticket.descripcion}</td></tr>
-                            <tr><td><strong>Categoría:</strong></td><td>${ticket.categoria}</td></tr>
-                            <tr><td><strong>Prioridad:</strong></td><td><span class="badge bg-${obtenerColorPrioridad(ticket.prioridad)}">${ticket.prioridad.toUpperCase()}</span></td></tr>
-                            <tr><td><strong>Estado:</strong></td><td><span class="badge bg-${obtenerColorEstado(ticket.estado)}">${ticket.estado.replace('_', ' ').toUpperCase()}</span></td></tr>
-                            ${archivosHtml}
-                        </table>
+                <div class="detail-layout">
+                    <div class="detail-columns">
+                        <section class="detail-block">
+                            <h6 class="detail-title">Resumen del ticket</h6>
+                            <div class="detail-grid">
+                                <div class="detail-row">
+                                    <span>Título</span>
+                                    <strong>${ticket.titulo}</strong>
+                                </div>
+                                <div class="detail-row">
+                                    <span>Descripción</span>
+                                    <strong>${ticket.descripcion}</strong>
+                                </div>
+                                <div class="detail-row">
+                                    <span>Categoría</span>
+                                    <strong>${ticket.categoria}</strong>
+                                </div>
+                                <div class="detail-row">
+                                    <span>Prioridad</span>
+                                    <strong><span class="badge bg-${obtenerColorPrioridad(ticket.prioridad)}">${ticket.prioridad.toUpperCase()}</span></strong>
+                                </div>
+                                <div class="detail-row">
+                                    <span>Estado</span>
+                                    <strong><span class="badge bg-${obtenerColorEstado(ticket.estado)}">${ticket.estado.replace('_', ' ').toUpperCase()}</span></strong>
+                                </div>
+                            </div>
+                        </section>
+                        <section class="detail-block">
+                            <h6 class="detail-title">Seguimiento</h6>
+                            <div class="detail-grid">
+                                <div class="detail-row">
+                                    <span>Solicitante</span>
+                                    <strong>${ticket.solicitante_nombre}</strong>
+                                </div>
+                                <div class="detail-row">
+                                    <span>Número de ficha</span>
+                                    <strong>${ticket.numero_ficha}</strong>
+                                </div>
+                                <div class="detail-row">
+                                    <span>Asignado a</span>
+                                    <strong>${ticket.asignado_nombre || 'Sin asignar'}</strong>
+                                </div>
+                                <div class="detail-row">
+                                    <span>Fecha de creación</span>
+                                    <strong>${formatearFecha(ticket.fecha_creacion)}</strong>
+                                </div>
+                                ${ticket.fecha_resolucion ? `<div class="detail-row"><span>Fecha de resolución</span><strong>${formatearFecha(ticket.fecha_resolucion)}</strong></div>` : ''}
+                                ${ticket.resolucion ? `<div class="detail-row"><span>Resolución</span><strong>${ticket.resolucion}</strong></div>` : ''}
+                            </div>
+                        </section>
                     </div>
-                    <div class="col-md-6">
-                        <table class="table table-borderless">
-                            <tr><td><strong>Solicitante:</strong></td><td>${ticket.solicitante_nombre}</td></tr>
-                            <tr><td><strong>Ficha:</strong></td><td>${ticket.numero_ficha}</td></tr>
-                            <tr><td><strong>Asignado a:</strong></td><td>${ticket.asignado_nombre || '<span class="text-muted">Sin asignar</span>'}</td></tr>
-                            <tr><td><strong>Fecha creación:</strong></td><td>${formatearFecha(ticket.fecha_creacion)}</td></tr>
-                            ${ticket.fecha_resolucion ? `<tr><td><strong>Fecha resolución:</strong></td><td>${formatearFecha(ticket.fecha_resolucion)}</td></tr>` : ''}
-                            ${ticket.resolucion ? `<tr><td><strong>Resolución:</strong></td><td>${ticket.resolucion}</td></tr>` : ''}
-                        </table>
-                    </div>
+                    ${archivosHtml}
+                    <section class="detail-block">
+                        <h6 class="detail-title">Historial</h6>
+                        <div class="timeline">
+                            ${history.map(item => `
+                                <div class="timeline-item">
+                                    <h6>${item.label}</h6>
+                                    <span>${item.value}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </section>
                 </div>
             `;
-            
-            let footerButtons = '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>';
-            
+
+            let footerButtons = `
+                <button type="button" class="btn btn-ghost" data-modal-close>Cerrar</button>
+            `;
+
             if (ticket.estado === 'resuelto') {
                 footerButtons = `
-                    <button type="button" class="btn btn-success" onclick="cerrarTicket(${ticket.id}, 'satisfactoria')">
-                        <i class="fas fa-thumbs-up me-2"></i>Satisfactoria
+                    <button type="button" class="btn btn-primary" onclick="cerrarTicket(${ticket.id}, 'satisfactoria')">
+                        <i class="fas fa-thumbs-up"></i>
+                        Satisfactoria
                     </button>
-                    <button type="button" class="btn btn-warning" onclick="cerrarTicket(${ticket.id}, 'insatisfactoria')">
-                        <i class="fas fa-thumbs-down me-2"></i>Insatisfactoria
+                    <button type="button" class="btn btn-outline" onclick="cerrarTicket(${ticket.id}, 'insatisfactoria')">
+                        <i class="fas fa-thumbs-down"></i>
+                        Insatisfactoria
                     </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-ghost" data-modal-close>Cerrar</button>
                 `;
             }
-            
+
             footer.innerHTML = footerButtons;
-            new bootstrap.Modal(modal).show();
+            new bootstrap.Modal(modalElement).show();
         }
 
         async function cerrarTicket(ticketId, satisfaccion) {
@@ -1300,40 +1534,23 @@ document.getElementById('formNuevoTicket').addEventListener('submit', async func
                 const response = await fetch(`api/tickets_publico.php?action=cerrar&id=${ticketId}`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        satisfaccion: satisfaccion
-                    })
+                    body: JSON.stringify({ satisfaccion })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
-                    mostrarMensaje('Ticket cerrado exitosamente', 'success');
+                    mostrarMensaje('Ticket cerrado correctamente', 'success');
                     bootstrap.Modal.getInstance(document.getElementById('modalVerTicket')).hide();
                     cargarTicketsUsuario();
                 } else {
-                    mostrarMensaje(data.message || 'Error al cerrar el ticket', 'danger');
+                    mostrarMensaje(data.message || 'No fue posible cerrar el ticket', 'danger');
                 }
             } catch (error) {
                 mostrarMensaje('Error de conexión', 'danger');
             }
-        }
-
-        function mostrarMensaje(mensaje, tipo) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${tipo} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
-            alertDiv.style.zIndex = '9999';
-            alertDiv.innerHTML = `
-                ${mensaje}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            document.body.appendChild(alertDiv);
-            
-            setTimeout(() => {
-                alertDiv.remove();
-            }, 5000);
         }
 
         function formatearFecha(fecha) {
@@ -1343,94 +1560,91 @@ document.getElementById('formNuevoTicket').addEventListener('submit', async func
 
         function obtenerColorPrioridad(prioridad) {
             switch(prioridad) {
-                case 'urgente': return 'danger';
-                case 'alta': return 'warning';
-                case 'media': return 'info';
-                case 'baja': return 'secondary';
-                default: return 'secondary';
+                case 'urgente':
+                    return 'danger';
+                case 'alta':
+                    return 'warning';
+                case 'media':
+                    return 'info';
+                case 'baja':
+                    return 'secondary';
+                default:
+                    return 'secondary';
             }
         }
 
         function obtenerColorEstado(estado) {
             switch(estado) {
-                case 'abierto': return 'primary';
-                case 'en_proceso': return 'warning';
-                case 'resuelto': return 'success';
-                case 'cerrado': return 'secondary';
-                default: return 'secondary';
+                case 'abierto':
+                    return 'primary';
+                case 'en_proceso':
+                    return 'warning';
+                case 'resuelto':
+                    return 'success';
+                case 'cerrado':
+                    return 'secondary';
+                default:
+                    return 'secondary';
             }
         }
-        
-        
-        // Función para probar notificaciones
+
         async function testNotification() {
             try {
-                mostrarMensaje('⏳ Enviando notificación de prueba...', 'info');
-                
+                mostrarMensaje('Enviando notificación de prueba...', 'info');
+
                 const response = await fetch('http://192.168.1.134:5214/web/Ticket/api.php/api/test_notification', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        'title': '🧪 Test desde Web',
-                        'body': 'Esta es una notificación de prueba desde la página web - ' + new Date().toLocaleTimeString()
+                        title: 'Test desde Web',
+                        body: 'Notificación de prueba - ' + new Date().toLocaleTimeString()
                     })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok) {
-                    mostrarMensaje('✅ Notificación de prueba enviada correctamente!', 'success');
-                    console.log('Test notification response:', data);
+                    mostrarMensaje('Notificación enviada correctamente', 'success');
+                    console.log('Respuesta notificación:', data);
                 } else {
-                    mostrarMensaje('❌ Error enviando notificación: ' + (data.error || 'Error desconocido'), 'danger');
+                    mostrarMensaje('Error enviando notificación: ' + (data.error || 'Desconocido'), 'danger');
                 }
-                
             } catch (error) {
-                console.error('Error:', error);
-                mostrarMensaje('❌ Error de conexión: ' + error.message, 'danger');
+                mostrarMensaje('Error de conexión: ' + error.message, 'danger');
             }
         }
-        
-        // Función para enviar notificación de ticket usando el mismo método exitoso
+
         async function sendTicketNotification(title, body, data = {}) {
             try {
-                console.log('📧 Enviando notificación de ticket...', { title, body, data });
-                
                 const response = await fetch('http://192.168.1.134:5214/web/Ticket/api.php/api/test_notification', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        'title': title,
-                        'body': body
-                    })
+                    body: JSON.stringify({ title, body })
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (response.ok) {
-                    console.log('✅ Notificación de ticket enviada exitosamente!', result);
+                    console.log('Notificación enviada', result);
                 } else {
-                    console.error('❌ Error enviando notificación de ticket:', result);
+                    console.error('Error enviando notificación', result);
                 }
-                
+
                 return response.ok;
-                
             } catch (error) {
-                console.error('❌ Error enviando notificación de ticket:', error);
+                console.error('Error enviando notificación', error);
                 return false;
             }
         }
-       
-        // Actualizar personal IT cada 30 segundos
-        function cargartodo(){
+
+        function cargartodo() {
             cargarPersonalIT();
             accederSistema();
         }
-       
     </script>
 </body>
 </html>

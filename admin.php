@@ -3,7 +3,6 @@
 require_once 'config/database.php';
 iniciarSesion();
 
-// Verificar login de administrador
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['admin_login'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
@@ -24,7 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['admin_login'])) {
             $_SESSION['admin_nombre'] = $row['nombre'];
             $_SESSION['admin_email'] = $row['email'];
             
-            // Actualizar último acceso
             $updateQuery = "UPDATE usuarios SET ultimo_acceso = NOW() WHERE id = ?";
             $updateStmt = $db->prepare($updateQuery);
             $updateStmt->bindParam(1, $row['id']);
@@ -36,14 +34,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['admin_login'])) {
             $error_message = 'Credenciales incorrectas';
         }
     } else {
-        $error_message = 'Usuario no encontrado o no tiene permisos de administrador';
+        $error_message = 'Usuario no encontrado o sin permisos administrativos';
     }
 }
 
-// Verificar si ya está logueado como admin
 $isLoggedIn = isset($_SESSION['admin_id']);
 
-// Logout
 if (isset($_GET['logout'])) {
     unset($_SESSION['admin_id']);
     unset($_SESSION['admin_nombre']);
@@ -59,10 +55,9 @@ if (isset($_GET['logout'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración - Sistema IT</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-        <style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -71,817 +66,732 @@ if (isset($_GET['logout'])) {
 
         :root {
             --color-red: #d32f2f;
-            --color-red-dark: #a31616;
-            --color-red-light: #ff6f61;
-            --color-black: #000000;
-            --color-charcoal: #0d0f12;
-            --color-graphite: #181a1f;
-            --color-ink: #202228;
+            --color-red-strong: #b71c1c;
             --color-white: #ffffff;
-            --color-gray-50: #f8f8f8;
-            --color-gray-100: #ededed;
-            --color-gray-300: #d6d6d6;
-            --color-gray-500: #8b8b8b;
-            --shadow-soft: 0 12px 32px rgba(0, 0, 0, 0.15);
-            --shadow-medium: 0 18px 44px rgba(0, 0, 0, 0.18);
-            --shadow-strong: 0 24px 60px rgba(211, 47, 47, 0.35);
+            --color-surface: #f4f4f6;
+            --color-text: #121212;
+            --color-muted: rgba(0, 0, 0, 0.6);
+            --color-border: rgba(211, 47, 47, 0.25);
+            --color-border-soft: rgba(0, 0, 0, 0.08);
+            --color-shadow: 0 32px 80px rgba(0, 0, 0, 0.14);
+            --radius-sm: 10px;
             --radius-md: 16px;
             --radius-lg: 22px;
-            --transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-            --primary-color: var(--color-red);
-            --primary-dark: var(--color-red-dark);
-            --primary-light: var(--color-red-light);
-            --bg-light: var(--color-white);
-            --text-dark: var(--color-ink);
-            --text-light: var(--color-gray-500);
-            --border-color: rgba(0, 0, 0, 0.08);
-            --success-color: var(--color-red);
-            --warning-color: #ff8f70;
-            --danger-color: var(--color-red);
-        }
-
-        html {
-            scroll-behavior: smooth;
+            --transition: all 0.35s ease;
         }
 
         body {
-            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(155deg, var(--color-charcoal) 0%, var(--color-black) 55%, var(--color-gray-50) 140%);
-            color: var(--color-ink);
+            font-family: 'Poppins', sans-serif;
+            background: var(--color-surface);
+            color: var(--color-text);
             min-height: 100vh;
-            line-height: 1.7;
-            overflow-x: hidden;
-            position: relative;
         }
 
-        body::before,
-        body::after {
-            content: '';
-            position: fixed;
-            width: 620px;
-            height: 620px;
-            background: radial-gradient(circle, rgba(211, 47, 47, 0.22) 0%, transparent 70%);
-            z-index: -1;
-            pointer-events: none;
-            animation: glow 12s ease-in-out infinite;
-        }
-
-        body::before {
-            top: -220px;
-            right: -200px;
-        }
-
-        body::after {
-            bottom: -260px;
-            left: -180px;
-            animation-delay: 4s;
-        }
-
-        ::selection {
-            background: var(--color-red);
-            color: var(--color-white);
+        body.modal-open {
+            overflow: hidden;
         }
 
         a {
-            color: var(--color-red);
-            transition: var(--transition);
+            color: inherit;
             text-decoration: none;
         }
 
-        a:hover {
-            color: var(--color-red-dark);
-        }
-
-        h1, h2, h3, h4, h5, h6 {
-            font-weight: 700;
-            color: var(--color-ink);
-        }
-
-        p, span, label {
-            color: var(--color-gray-500);
-        }
-
-        .container {
-            width: min(1180px, 92vw);
-            margin: 0 auto;
-        }
-
-        .container-fluid {
-            width: min(1280px, 96vw);
-            margin: 0 auto;
-        }
-
-        .row {
-            --bs-gutter-x: 2.5rem;
-            --bs-gutter-y: 2.5rem;
-        }
-
-        .header-main {
-            background: radial-gradient(circle at top left, rgba(211, 47, 47, 0.45), transparent 60%),
-                        linear-gradient(135deg, var(--color-black) 0%, var(--color-graphite) 100%);
-            color: var(--color-white);
-            padding: 4rem 0;
-            border-bottom: 4px solid var(--color-red);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header-main .badge {
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(6px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            border-radius: 999px;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-        }
-
-        .header-main h1 {
-            font-size: clamp(2.6rem, 5vw, 3.4rem);
-            letter-spacing: -1px;
-            text-shadow: 0 14px 35px rgba(0, 0, 0, 0.35);
-        }
-
-        .header-main p {
-            font-size: clamp(1rem, 2vw, 1.2rem);
-            color: rgba(255, 255, 255, 0.72);
-        }
-
-        .main-card,
-        .card,
-        .card-dashboard {
-            background: var(--color-white);
-            border-radius: var(--radius-md);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: var(--shadow-soft);
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .main-card::before,
-        .card::before,
-        .card-dashboard::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), transparent);
-            opacity: 0;
-            transition: var(--transition);
-        }
-
-        .main-card:hover,
-        .card:hover,
-        .card-dashboard:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-medium);
-        }
-
-        .main-card:hover::before,
-        .card:hover::before,
-        .card-dashboard:hover::before {
-            opacity: 1;
-        }
-
-        .card-header,
-        .card-dashboard .card-header,
-        .stat-card {
-            background: linear-gradient(135deg, var(--color-black) 0%, var(--color-graphite) 100%);
-            color: var(--color-white);
-            border: none;
-            padding: 1.5rem 1.75rem;
-            border-bottom: 3px solid var(--color-red);
-        }
-
-        .card-body {
-            padding: 1.75rem;
-        }
-
-        .btn {
-            border-radius: 999px;
-            padding: 0.85rem 1.8rem;
-            font-weight: 600;
-            letter-spacing: 0.6px;
-            text-transform: uppercase;
-            position: relative;
-            overflow: hidden;
-            border: none;
-            transition: var(--transition);
-        }
-
-        .btn::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s ease, height 0.6s ease;
-        }
-
-        .btn:hover::after {
-            width: 380px;
-            height: 380px;
-        }
-
-        .btn-primary,
-        .btn-danger,
-        .btn-floating {
-            background: linear-gradient(135deg, var(--color-red) 0%, var(--color-red-dark) 100%);
-            color: var(--color-white);
-            box-shadow: var(--shadow-strong);
-        }
-
-        .btn-primary:hover,
-        .btn-danger:hover,
-        .btn-floating:hover {
-            background: linear-gradient(135deg, var(--color-red-dark) 0%, var(--color-black) 100%);
-            transform: translateY(-4px);
-        }
-
-        .btn-outline-primary {
-            border: 2px solid var(--color-red);
-            color: var(--color-red);
-            background: transparent;
-        }
-
-        .btn-outline-primary:hover,
-        .btn-outline-primary.active {
+        .app-header {
+            position: sticky;
+            top: 0;
+            inset-inline: 0;
             background: var(--color-red);
             color: var(--color-white);
-            box-shadow: var(--shadow-strong);
+            padding: 1.4rem 5vw;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            z-index: 40;
+            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.22);
         }
 
-        .btn-secondary {
-            background: var(--color-gray-50);
-            color: var(--color-ink);
-            border: 2px solid var(--color-gray-100);
+        .app-header__brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
-        .btn-secondary:hover {
+        .brand-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.18);
+            display: grid;
+            place-items: center;
+            font-size: 1.6rem;
+        }
+
+        .app-header__title {
+            font-size: 1.45rem;
+            font-weight: 600;
+        }
+
+        .app-header__subtitle {
+            font-size: 0.85rem;
+            opacity: 0.85;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .user-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.6rem 1.1rem;
+            border-radius: 999px;
+            border: 1.5px solid rgba(255, 255, 255, 0.45);
+            background: rgba(255, 255, 255, 0.1);
+            font-weight: 500;
+        }
+
+        .logout-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.65rem 1.1rem;
+            border-radius: 999px;
+            border: 1.5px solid rgba(255, 255, 255, 0.45);
+            color: var(--color-white);
+            transition: var(--transition);
+        }
+
+        .logout-link:hover {
+            border-color: var(--color-white);
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .app-main {
+            padding: 3rem 0 4rem;
+        }
+
+        .content-shell {
+            width: min(1260px, 92vw);
+            margin: 0 auto;
+            display: grid;
+            gap: 2.5rem;
+        }
+
+        .page-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .page-header__title h1 {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .page-header__title p {
+            color: var(--color-muted);
+            font-size: 0.95rem;
+        }
+
+        .page-header__info {
+            display: grid;
+            gap: 0.35rem;
+            font-size: 0.9rem;
+            text-align: right;
+        }
+
+        .page-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .nav-button {
+            border: 1.5px solid var(--color-border-soft);
+            background: var(--color-white);
+            border-radius: var(--radius-md);
+            padding: 0.9rem 1.3rem;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            cursor: pointer;
+        }
+
+        .nav-button i { font-size: 1.1rem; color: var(--color-red); }
+
+        .nav-button:hover { border-color: var(--color-red); }
+
+        .nav-button.is-active {
             border-color: var(--color-red);
             color: var(--color-red);
+            box-shadow: 0 0 0 4px rgba(211, 47, 47, 0.15);
+        }
+
+        .panel {
+            background: var(--color-white);
+            border-radius: var(--radius-lg);
+            border: 1.5px solid var(--color-border);
+            box-shadow: var(--color-shadow);
+            padding: 2.4rem;
+            display: grid;
+            gap: 1.75rem;
+        }
+
+        .panel__header {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .panel__header--inline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .panel__header h2,
+        .panel__header h3 {
+            font-size: 1.35rem;
+            font-weight: 600;
+        }
+
+        .panel__hint {
+            font-size: 0.85rem;
+            color: var(--color-muted);
+        }
+
+        .panel__body {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .stat-card {
+            border: 1.5px solid rgba(0, 0, 0, 0.08);
+            border-radius: var(--radius-md);
+            padding: 1.4rem;
+            background: var(--color-white);
+            display: grid;
+            gap: 0.5rem;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .stat-card i {
+            font-size: 1.8rem;
+            color: var(--color-red);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--color-border);
+        }
+
+        .stat-card h4 {
+            font-size: 1.6rem;
+            font-weight: 600;
+        }
+
+        .stat-card span {
+            font-size: 0.85rem;
+            color: var(--color-muted);
         }
 
         .badge {
             display: inline-flex;
             align-items: center;
-            gap: 0.35rem;
+            justify-content: center;
             border-radius: 999px;
-            padding: 0.45rem 0.9rem;
+            padding: 0.35rem 0.9rem;
             font-size: 0.75rem;
-            letter-spacing: 0.6px;
-            text-transform: uppercase;
+            font-weight: 600;
+            border: 1px solid transparent;
+            letter-spacing: 0.4px;
         }
 
-        .bg-danger { background: var(--color-red) !important; color: var(--color-white) !important; }
-        .bg-warning { background: linear-gradient(135deg, #ff8f70, #ff6f61) !important; color: var(--color-white) !important; }
-        .bg-success { background: linear-gradient(135deg, var(--color-red), var(--color-red-light)) !important; color: var(--color-white) !important; }
-        .bg-secondary { background: var(--color-gray-50) !important; color: var(--color-ink) !important; }
-        .bg-primary { background: var(--color-red) !important; color: var(--color-white) !important; }
-        .bg-light { background: rgba(255, 255, 255, 0.85) !important; color: var(--color-ink) !important; }
+        .bg-primary { background: var(--color-red); color: var(--color-white); }
+        .bg-danger { background: rgba(211, 47, 47, 0.2); color: var(--color-red); border-color: rgba(211, 47, 47, 0.28); }
+        .bg-warning { background: rgba(0, 0, 0, 0.09); color: var(--color-text); border-color: rgba(0, 0, 0, 0.12); }
+        .bg-success { background: rgba(211, 47, 47, 0.12); color: var(--color-red); border-color: rgba(211, 47, 47, 0.2); }
+        .bg-info { background: rgba(0, 0, 0, 0.05); color: var(--color-text); border-color: rgba(0, 0, 0, 0.12); }
+        .bg-secondary { background: rgba(0, 0, 0, 0.05); color: var(--color-text); border-color: rgba(0, 0, 0, 0.12); }
 
-        .text-muted { color: var(--color-gray-500) !important; }
-        .text-white-80 { color: rgba(255, 255, 255, 0.8); }
-
-        .form-control,
-        .form-select {
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            padding: 0.8rem 1.4rem;
             border-radius: var(--radius-md);
-            border: 2px solid var(--color-gray-100);
-            padding: 0.9rem 1rem;
+            border: none;
+            font-weight: 600;
             font-size: 0.95rem;
+            background: transparent;
+            color: var(--color-text);
+            cursor: pointer;
             transition: var(--transition);
-            color: var(--color-ink);
-            background-color: var(--color-white);
         }
 
-        .form-control:focus,
-        .form-select:focus {
+        .btn i { font-size: 1rem; }
+
+        .btn-primary { background: var(--color-red); color: var(--color-white); }
+        .btn-primary:hover { background: var(--color-red-strong); transform: translateY(-2px); }
+
+        .btn-outline { border: 1.5px solid var(--color-red); color: var(--color-red); background: var(--color-white); }
+        .btn-outline:hover { background: rgba(211, 47, 47, 0.12); }
+
+        .btn-ghost { border: 1.5px solid var(--color-border-soft); color: var(--color-text); }
+        .btn-ghost:hover { border-color: var(--color-red); color: var(--color-red); }
+
+        .btn-chip {
+            border: 1.5px solid rgba(0, 0, 0, 0.08);
+            background: var(--color-white);
+            border-radius: 999px;
+            padding: 0.55rem 1.2rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-chip.is-active {
             border-color: var(--color-red);
-            box-shadow: 0 0 0 4px rgba(211, 47, 47, 0.12);
-            outline: none;
-        }
-
-        .input-group-text {
-            border-radius: var(--radius-md) 0 0 var(--radius-md);
-            background: var(--color-gray-50);
-            border: 2px solid var(--color-gray-100);
-            border-right: none;
-            color: var(--color-gray-500);
-            transition: var(--transition);
-        }
-
-        .input-group:focus-within .input-group-text {
             background: var(--color-red);
-            border-color: var(--color-red);
             color: var(--color-white);
         }
 
-        .tab-button {
-            background: var(--color-gray-50) !important;
-            border: 2px solid rgba(0, 0, 0, 0.05) !important;
-            border-radius: var(--radius-md);
-            color: var(--color-ink) !important;
+        .btn-sm {
+            padding: 0.55rem 1rem;
+            font-size: 0.82rem;
+            border-radius: 20px;
         }
 
-        .tab-button.active {
-            background: var(--color-red) !important;
-            color: var(--color-white) !important;
-            border-color: var(--color-red) !important;
+        .table-wrapper {
+            overflow-x: auto;
         }
 
-        .tab-button:not(.active):hover {
-            border-color: var(--color-red) !important;
-            color: var(--color-red) !important;
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        .ticket-card,
-        .timeline-item,
-        .table-hover tbody tr {
-            transition: var(--transition);
-        }
-
-        .ticket-card {
-            border: 2px solid rgba(0, 0, 0, 0.04);
-            border-left: 5px solid transparent;
-            border-radius: var(--radius-md);
-            padding: 1.5rem;
-            background: var(--color-white);
-        }
-
-        .ticket-card:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-medium);
-            border-color: rgba(211, 47, 47, 0.35);
-        }
-
-        .ticket-priority-urgente { border-left-color: var(--color-red); }
-        .ticket-priority-alta { border-left-color: #ff8f70; }
-        .ticket-priority-media { border-left-color: var(--color-black); }
-        .ticket-priority-baja { border-left-color: var(--color-gray-300); }
-
-        .personal-card {
-            text-align: center;
-            padding: 2rem;
-            border: 2px solid rgba(0, 0, 0, 0.05);
-            border-radius: var(--radius-md);
-            background: var(--color-white);
-        }
-
-        .personal-card .fa-user-circle {
-            color: var(--color-red);
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            filter: drop-shadow(0 8px 24px rgba(211, 47, 47, 0.35));
-        }
-
-        .alert {
-            border-radius: var(--radius-md);
-            border: none;
-            padding: 1.5rem;
-            border-left: 5px solid var(--color-red);
-            background: linear-gradient(135deg, rgba(211, 47, 47, 0.08), rgba(211, 47, 47, 0.15));
-            color: var(--color-ink);
-        }
-
-        .table {
-            border-spacing: 0 12px;
-        }
-
-        .table thead th {
+        .data-table thead {
             text-transform: uppercase;
-            letter-spacing: 0.6px;
-            font-size: 0.75rem;
-            color: var(--color-gray-500);
-            border: none;
+            font-size: 0.78rem;
+            letter-spacing: 0.4px;
+            color: var(--color-muted);
+        }
+
+        .data-table thead th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
             background: rgba(0, 0, 0, 0.03);
-            padding: 1rem;
         }
 
-        .table tbody tr {
+        .data-table tbody tr {
             background: var(--color-white);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-soft);
-        }
-
-        .table tbody tr:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-medium);
-        }
-
-        .table tbody td {
-            border: none;
-            padding: 1.1rem 1rem;
-            vertical-align: middle;
-            color: var(--color-ink);
-        }
-
-        .navbar-custom,
-        .navbar {
-            background: linear-gradient(135deg, var(--color-black) 0%, var(--color-graphite) 100%);
-            border-bottom: 4px solid var(--color-red);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-        }
-
-        .navbar-brand,
-        .navbar-nav .nav-link {
-            color: rgba(255, 255, 255, 0.85) !important;
-            font-weight: 500;
             transition: var(--transition);
         }
 
-        .navbar-nav .nav-link:hover,
-        .navbar-nav .nav-link.active {
-            color: var(--color-white) !important;
+        .data-table tbody tr:hover {
+            background: rgba(211, 47, 47, 0.05);
         }
 
-        .navbar-toggler {
-            border-color: rgba(255, 255, 255, 0.35);
+        .data-table tbody td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 0.92rem;
         }
 
-        .navbar-toggler-icon {
-            filter: brightness(10);
+        .table-actions {
+            display: inline-flex;
+            gap: 0.4rem;
         }
 
-        .btn-floating {
-            width: 58px;
-            height: 58px;
-            border-radius: 50%;
-            display: grid;
-            place-items: center;
+        .section { display: none; animation: fadeIn 0.45s ease; }
+        .section.is-active { display: grid; gap: 2.5rem; }
+
+        .modal {
             position: fixed;
-            bottom: 32px;
-            right: 32px;
-            z-index: 1020;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            z-index: 60;
         }
 
-        .section { display: none; }
-        .section.active { display: block; animation: fadeUp 0.6s ease forwards; }
+        .modal--visible { display: flex; }
 
-        .modal.fade .modal-dialog {
-            transform: translateY(30px);
-            transition: var(--transition);
-        }
-
-        .modal.show .modal-dialog {
-            transform: translateY(0);
-        }
-
-        .modal-content {
+        .modal__dialog {
+            width: min(880px, 95vw);
+            background: var(--color-white);
             border-radius: var(--radius-lg);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: var(--shadow-medium);
+            border: 1.5px solid var(--color-border);
+            box-shadow: var(--color-shadow);
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
         }
 
-        .modal-header {
-            border-bottom: 3px solid var(--color-red);
-            background: linear-gradient(135deg, var(--color-black), var(--color-graphite));
-            color: var(--color-white);
+        .modal__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.6rem 2rem;
+            background: rgba(211, 47, 47, 0.08);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
         }
 
-        .modal-footer {
+        .modal__body {
+            padding: 2rem;
+            overflow-y: auto;
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .modal__footer {
+            padding: 1.4rem 2rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.8rem;
             border-top: 1px solid rgba(0, 0, 0, 0.08);
-            background: var(--color-gray-50);
         }
 
         .btn-close {
-            filter: brightness(10);
-        }
-
-        .timeline {
-            position: relative;
-            padding-left: 2rem;
-        }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 0.45rem;
-            top: 0.5rem;
-            bottom: 0.5rem;
-            width: 2px;
-            background: linear-gradient(180deg, rgba(211, 47, 47, 0.45), transparent);
-        }
-
-        .timeline-marker {
-            width: 12px;
-            height: 12px;
-            background: var(--color-red);
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
-            box-shadow: 0 0 0 6px rgba(211, 47, 47, 0.1);
-            position: absolute;
-            left: -0.35rem;
-            top: 0.6rem;
-        }
-
-        .status-badge {
-            padding: 0.35rem 0.65rem;
-            border-radius: 999px;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .user-status {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 6px;
-        }
-
-        .status-disponible { background: #22c55e; }
-        .status-ocupado { background: #f59e0b; }
-        .status-ausente { background: #ef4444; }
-
-        .ticket-estado-abierto { background-color: rgba(21, 10, 255, 0.08); }
-        .ticket-estado-en_proceso { background-color: rgba(255, 193, 7, 0.12); }
-        .ticket-estado-resuelto { background-color: rgba(34, 197, 94, 0.12); }
-        .ticket-estado-cerrado.satisfactoria { background-color: rgba(34, 197, 94, 0.18); }
-        .ticket-estado-cerrado.insatisfactoria { background-color: rgba(239, 68, 68, 0.12); }
-
-        .auth-card {
-            background: rgba(255, 255, 255, 0.94);
-            border-radius: var(--radius-lg);
-            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(14px);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .auth-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(211, 47, 47, 0.15), transparent);
-            opacity: 0;
+            border: none;
+            background: rgba(0, 0, 0, 0.12);
+            color: var(--color-text);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
             transition: var(--transition);
         }
 
-        .auth-card:hover::before {
-            opacity: 1;
+        .btn-close:hover {
+            background: rgba(211, 47, 47, 0.3);
+            color: var(--color-white);
         }
 
-        .hero-icon {
-            font-size: 3.6rem;
-            color: rgba(255, 255, 255, 0.18);
+        .detail-columns { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+        .detail-card { border: 1px solid rgba(0, 0, 0, 0.08); border-radius: var(--radius-md); padding: 1.25rem; display: grid; gap: 0.65rem; }
+        .detail-card h6 { font-size: 1rem; font-weight: 600; }
+        .detail-grid { display: grid; gap: 0.6rem; }
+        .detail-grid span { font-size: 0.85rem; color: var(--color-muted); display: block; }
+
+        .toast-stack {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            display: grid;
+            gap: 0.75rem;
+            z-index: 80;
+            pointer-events: none;
         }
 
-        .fade-in {
-            animation: fadeUp 0.5s ease forwards;
+        .toast {
+            min-width: 260px;
+            max-width: 340px;
+            background: var(--color-white);
+            border: 1.5px solid rgba(0, 0, 0, 0.08);
+            border-left: 5px solid var(--color-red);
+            border-radius: var(--radius-md);
+            padding: 0.95rem 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            box-shadow: var(--color-shadow);
+            animation: slideDown 0.4s ease;
+            pointer-events: auto;
         }
 
-        .slide-in-up {
-            animation: fadeUp 0.6s ease forwards;
+        .toast--success { border-left-color: rgba(0, 0, 0, 0.45); }
+        .toast--warning { border-left-color: rgba(211, 47, 47, 0.35); }
+        .toast--danger { border-left-color: var(--color-red); }
+
+        .toast__message { font-size: 0.9rem; }
+
+        .toast__close {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0, 0, 0, 0.12);
+            color: var(--color-text);
+            cursor: pointer;
+            transition: var(--transition);
         }
 
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .toast__close:hover {
+            background: rgba(211, 47, 47, 0.25);
+            color: var(--color-white);
         }
 
-        @keyframes glow {
-            0%, 100% {
-                transform: scale(0.95);
-                opacity: 0.6;
-            }
-            50% {
-                transform: scale(1.1);
-                opacity: 1;
-            }
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--color-muted);
+            display: grid;
+            gap: 0.5rem;
         }
 
-        @media (max-width: 992px) {
-            .header-main {
-                text-align: center;
-                padding: 3rem 0;
-            }
-
-            .hero-icon {
-                display: none;
-            }
-
-            .btn {
-                width: 100%;
-            }
-
-            .navbar-collapse {
-                background: rgba(0, 0, 0, 0.85);
-                border-radius: var(--radius-md);
-                padding: 1.5rem;
-            }
-
-            .btn-floating {
-                right: 20px;
-                bottom: 20px;
-            }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        @media (max-width: 768px) {
-            .container,
-            .container-fluid {
-                width: min(95vw, 100%);
-            }
-
-            .header-main {
-                padding: 2.5rem 0;
-            }
-
-            .card,
-            .main-card,
-            .card-dashboard {
-                padding: 0 1rem;
-            }
-
-            .card-body {
-                padding: 1.5rem;
-            }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-12px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+
+        @media (max-width: 880px) {
+            .panel { padding: 2rem; }
+            .page-header__info { text-align: left; }
+        }
+
+        @media (max-width: 640px) {
+            .app-header { padding: 1.1rem 1.6rem; }
+            .brand-icon { width: 48px; height: 48px; font-size: 1.3rem; }
+            .panel { padding: 1.75rem; }
+            .modal__header,
+            .modal__body,
+            .modal__footer { padding-inline: 1.5rem; }
+        }
+
+        /* Login styles */
+        .login-wrapper {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 3rem 1.5rem;
+            background: var(--color-surface);
+        }
+
+        .auth-card {
+            width: min(420px, 100%);
+            background: var(--color-white);
+            border-radius: var(--radius-lg);
+            border: 1.5px solid var(--color-border);
+            padding: 3rem 2.75rem;
+            box-shadow: var(--color-shadow);
+            display: grid;
+            gap: 1.8rem;
+        }
+
+        .auth-header {
+            text-align: center;
+            display: grid;
+            gap: 0.6rem;
+        }
+
+        .auth-header i {
+            font-size: 2.6rem;
+            color: var(--color-red);
+        }
+
+        .form-grid { display: grid; gap: 1.25rem; }
+
+        .form-field { display: grid; gap: 0.55rem; }
+
+        label { font-size: 0.9rem; font-weight: 500; }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius-md);
+            border: 1.5px solid var(--color-border-soft);
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: var(--transition);
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: var(--color-red);
+            box-shadow: 0 0 0 4px rgba(211, 47, 47, 0.15);
+        }
+
+        .login-actions { display: grid; gap: 1rem; }
     </style>
 </head>
 <body>
     <?php if (!$isLoggedIn): ?>
-    <!-- Login Form -->
-    <div class="container d-flex align-items-center justify-content-center min-vh-100">
-        <div class="row justify-content-center w-100">
-            <div class="col-md-6 col-lg-4">
-                <div class="card login-card">
-                    <div class="card-body p-5">
-                        <div class="text-center mb-4">
-                            <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
-                            <h2 class="fw-bold text-dark">Administración IT</h2>
-                            <p class="text-muted">Panel de Control</p>
-                        </div>
-
-                        <?php if (isset($error_message)): ?>
-                        <div class="alert alert-danger">
-                            <i class="fas fa-exclamation-triangle"></i> <?= $error_message ?>
-                        </div>
-                        <?php endif; ?>
-
-                        <form method="POST">
-                            <input type="hidden" name="admin_login" value="1">
-                            <div class="mb-3">
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                    <input type="email" class="form-control" name="email" placeholder="Email" required>
-                                </div>
-                            </div>
-                            <div class="mb-4">
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                    <input type="password" class="form-control" name="password" placeholder="Contraseña" required>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="fas fa-sign-in-alt me-2"></i>Acceder
-                            </button>
-                        </form>
-
-                        <div class="text-center mt-4">
-                            <a href="index.php" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-2"></i>Volver al Sistema
-                            </a>
-                        </div>
-                    </div>
-                </div>
+    <div class="login-wrapper">
+        <section class="auth-card">
+            <div class="auth-header">
+                <i class="fas fa-shield-alt"></i>
+                <h2>Administración IT</h2>
+                <p class="panel__hint">Accede con tus credenciales de soporte</p>
             </div>
-        </div>
+
+            <?php if (isset($error_message)): ?>
+            <div class="toast toast--danger" style="position: static;">
+                <span class="toast__message"><i class="fas fa-triangle-exclamation"></i> <?= $error_message ?></span>
+                <button type="button" class="toast__close" onclick="this.closest('.toast').remove()"><i class="fas fa-xmark"></i></button>
+            </div>
+            <?php endif; ?>
+
+            <form method="POST" class="form-grid">
+                <input type="hidden" name="admin_login" value="1">
+                <div class="form-field">
+                    <label for="email">Correo institucional</label>
+                    <input type="email" id="email" name="email" placeholder="admin@empresa.com" required>
+                </div>
+                <div class="form-field">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                </div>
+                <div class="login-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt"></i>Acceder al panel
+                    </button>
+                    <a href="index.php" class="btn btn-ghost" style="text-align:center;">
+                        <i class="fas fa-arrow-left"></i>Volver al sistema
+                    </a>
+                </div>
+            </form>
+        </section>
     </div>
     <?php else: ?>
-    <!-- Admin Panel -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-shield-alt me-2"></i>
-                <strong>Panel IT</strong>
+
+    <header class="app-header">
+        <div class="app-header__brand">
+            <div class="brand-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div>
+                <div class="app-header__title">Panel administrativo</div>
+                <div class="app-header__subtitle">Supervisión completa del ecosistema IT</div>
+            </div>
+        </div>
+        <div class="header-actions">
+            <span class="user-chip">
+                <i class="fas fa-user-tie"></i>
+                <?= htmlspecialchars($_SESSION['admin_nombre']) ?>
+            </span>
+            <a class="logout-link" href="?logout=1">
+                <i class="fas fa-sign-out-alt"></i>Salir
             </a>
-            
-            <div class="navbar-nav ms-auto">
-                <div class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user-circle me-1"></i>
-                        <span><?= htmlspecialchars($_SESSION['admin_nombre']) ?></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="?logout=1"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
-                    </ul>
+        </div>
+    </header>
+
+    <main class="app-main">
+        <div class="content-shell">
+            <div class="page-header">
+                <div class="page-header__title">
+                    <h1>Control operacional</h1>
+                    <p>Gestiona tickets, reportes y desempeño del equipo IT desde un solo lugar.</p>
                 </div>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container-fluid py-4">
-        <!-- Estadísticas -->
-        <div class="row mb-4" id="statsCards">
-            <!-- Se llenan dinámicamente -->
-        </div>
-        
-        <!-- Navegación por pestañas -->
-        <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab">
-                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="todos-tickets-tab" data-bs-toggle="tab" data-bs-target="#todos-tickets" type="button" role="tab">
-                    <i class="fas fa-ticket-alt me-2"></i>Todos los Tickets
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="reportes-tab" data-bs-toggle="tab" data-bs-target="#reportes" type="button" role="tab">
-                    <i class="fas fa-chart-bar me-2"></i>Reportes
-                </button>
-            </li>
-        </ul>
-
-        <!-- Contenido de las pestañas -->
-        <div class="tab-content" id="mainTabsContent">
-            <!-- Dashboard -->
-            <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card card-dashboard">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0"><i class="fas fa-ticket-alt me-2"></i>Tickets Recientes</h5>
-                                <div class="d-flex gap-2">
-                                    <div class="btn-group" role="group">
-                                        <button class="btn btn-outline-primary btn-sm active" onclick="filtrarTickets('todos')">Todos</button>
-                                        <button class="btn btn-outline-primary btn-sm" onclick="filtrarTickets('abierto')">Abiertos</button>
-                                        <button class="btn btn-outline-primary btn-sm" onclick="filtrarTickets('en_proceso')">En Proceso</button>
-                                        <button class="btn btn-outline-primary btn-sm" onclick="filtrarTickets('resuelto')">Resueltos</button>
-                                    </div>
-                                    <div class="btn-group" role="group">
-                                        <button class="btn btn-outline-secondary btn-sm active" onclick="filtrarTicketsPorMes('todos')" id="btnFiltroMesTodos">
-                                            <i class="fas fa-list me-1"></i>Todos
-                                        </button>
-                                        <button class="btn btn-outline-secondary btn-sm" onclick="filtrarTicketsPorMes('mes_actual')" id="btnFiltroMesActual">
-                                            <i class="fas fa-calendar-day me-1"></i>Este Mes
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>Título</th>
-                                                <th>Prioridad</th>
-                                                <th>Estado</th>
-                                                <th>Solicitante</th>
-                                                <th>Ficha</th>
-                                                <th>Asignado</th>
-                                                <th>Fecha</th>
-                                                <th>Acciones</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="ticketsTable">
-                                            <!-- Se llena dinámicamente -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="page-header__info">
+                    <span>Sesión activa: <?= htmlspecialchars($_SESSION['admin_email']) ?></span>
+                    <span>Rol: Administrador IT</span>
                 </div>
             </div>
 
-            <!-- Todos los Tickets -->
-            <div class="tab-pane fade" id="todos-tickets" role="tabpanel">
-                <div class="card card-dashboard">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Gestión de Tickets</h5>
-                        <div class="d-flex gap-2">
-                            <div class="btn-group" role="group">
-                                <button class="btn btn-outline-primary active" onclick="filtrarTodosTickets('todos')">Todos</button>
-                                <button class="btn btn-outline-primary" onclick="filtrarTodosTickets('abierto')">Abiertos</button>
-                                <button class="btn btn-outline-primary" onclick="filtrarTodosTickets('en_proceso')">En Proceso</button>
-                                <button class="btn btn-outline-primary" onclick="filtrarTodosTickets('resuelto')">Resueltos</button>
+            <nav class="page-nav">
+                <button class="nav-button is-active" data-section="dashboard" onclick="mostrarSeccion('dashboard', this)">
+                    <i class="fas fa-gauge"></i>Dashboard
+                </button>
+                <button class="nav-button" data-section="todos-tickets" onclick="mostrarSeccion('todos-tickets', this)">
+                    <i class="fas fa-ticket"></i>Todos los tickets
+                </button>
+                <button class="nav-button" data-section="reportes" onclick="mostrarSeccion('reportes', this)">
+                    <i class="fas fa-chart-bar"></i>Reportes
+                </button>
+            </nav>
+
+            <section id="dashboard" class="section is-active">
+                <section class="panel">
+                    <div class="panel__header">
+                        <h2>Resumen general</h2>
+                        <span class="panel__hint">Indicadores clave del soporte</span>
+                    </div>
+                    <div class="panel__body">
+                        <div class="stat-grid" id="statsCards"></div>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel__header panel__header--inline">
+                        <h3>Tickets recientes</h3>
+                        <div class="panel__hint">Filtra por estado y periodo</div>
+                    </div>
+                    <div class="panel__body">
+                        <div style="display:flex; flex-wrap:wrap; gap:0.6rem; justify-content:space-between;">
+                            <div class="chip-group" style="display:flex; flex-wrap:wrap; gap:0.6rem;">
+                                <button class="btn btn-chip is-active" onclick="filtrarTickets('todos', event)">Todos</button>
+                                <button class="btn btn-chip" onclick="filtrarTickets('abierto', event)">Abiertos</button>
+                                <button class="btn btn-chip" onclick="filtrarTickets('en_proceso', event)">En proceso</button>
+                                <button class="btn btn-chip" onclick="filtrarTickets('resuelto', event)">Resueltos</button>
                             </div>
-                            <div class="btn-group" role="group">
-                                <button class="btn btn-outline-secondary active" onclick="filtrarTodosTicketsPorMes('todos')" id="btnFiltroMesTodosTodos">
-                                    <i class="fas fa-list me-1"></i>Todos
-                                </button>
-                                <button class="btn btn-outline-secondary" onclick="filtrarTodosTicketsPorMes('mes_actual')" id="btnFiltroMesTodosMesActual">
-                                    <i class="fas fa-calendar-day me-1"></i>Este Mes
-                                </button>
+                            <div class="chip-group" style="display:flex; gap:0.6rem;">
+                                <button class="btn btn-chip is-active" id="btnFiltroMesTodos" onclick="filtrarTicketsPorMes('todos', event)">Todos</button>
+                                <button class="btn btn-chip" id="btnFiltroMesActual" onclick="filtrarTicketsPorMes('mes_actual', event)">Este mes</button>
                             </div>
                         </div>
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Título</th>
+                                        <th>Prioridad</th>
+                                        <th>Estado</th>
+                                        <th>Solicitante</th>
+                                        <th>Ficha</th>
+                                        <th>Asignado</th>
+                                        <th>Fecha</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ticketsTable"></tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
+                </section>
+            </section>
+
+            <section id="todos-tickets" class="section">
+                <section class="panel">
+                    <div class="panel__header panel__header--inline">
+                        <h2>Gestión total de tickets</h2>
+                        <div class="panel__hint">Organiza y toma acciones masivas</div>
+                    </div>
+                    <div class="panel__body">
+                        <div style="display:flex; flex-wrap:wrap; gap:0.6rem; justify-content:space-between;">
+                            <div class="chip-group" style="display:flex; flex-wrap:wrap; gap:0.6rem;">
+                                <button class="btn btn-chip is-active" onclick="filtrarTodosTickets('todos', event)">Todos</button>
+                                <button class="btn btn-chip" onclick="filtrarTodosTickets('abierto', event)">Abiertos</button>
+                                <button class="btn btn-chip" onclick="filtrarTodosTickets('en_proceso', event)">En proceso</button>
+                                <button class="btn btn-chip" onclick="filtrarTodosTickets('resuelto', event)">Resueltos</button>
+                            </div>
+                            <div class="chip-group" style="display:flex; gap:0.6rem;">
+                                <button class="btn btn-chip is-active" id="btnFiltroMesTodosTodos" onclick="filtrarTodosTicketsPorMes('todos', event)">Todos</button>
+                                <button class="btn btn-chip" id="btnFiltroMesTodosMesActual" onclick="filtrarTodosTicketsPorMes('mes_actual', event)">Este mes</button>
+                            </div>
+                        </div>
+                        <div class="table-wrapper">
+                            <table class="data-table">
                                 <thead>
                                     <tr>
                                         <th>ID</th>
@@ -892,133 +802,192 @@ if (isset($_GET['logout'])) {
                                         <th>Ficha</th>
                                         <th>Asignado</th>
                                         <th>Fecha</th>
-                                        <th>Acciones</th>
+                                        <th></th>
                                     </tr>
                                 </thead>
-                                <tbody id="todosTicketsTable">
-                                    <!-- Se llena dinámicamente -->
-                                </tbody>
+                                <tbody id="todosTicketsTable"></tbody>
                             </table>
                         </div>
                     </div>
-                </div>
-            </div>
+                </section>
+            </section>
 
-            <!-- Reportes -->
-            <div class="tab-pane fade" id="reportes" role="tabpanel">
-                <div class="row">
-                    <div class="col-md-4 mb-4">
-                        <div class="card card-dashboard">
-                            <div class="card-body text-center">
-                                <i class="fas fa-file-excel fa-3x text-success mb-3"></i>
-                                <h5>Reporte General</h5>
-                                <p class="text-muted">Exportar todos los tickets a Excel</p>
-                                <button class="btn btn-success" onclick="generarReporteExcel('general')">
-                                    <i class="fas fa-download me-2"></i>Descargar
-                                </button>
-                            </div>
-                        </div>
+            <section id="reportes" class="section">
+                <section class="panel">
+                    <div class="panel__header">
+                        <h2>Reportes y exportaciones</h2>
+                        <span class="panel__hint">Genera archivos Excel listos para análisis</span>
                     </div>
-                    
-                    <div class="col-md-4 mb-4">
-                        <div class="card card-dashboard">
-                            <div class="card-body text-center">
-                                <i class="fas fa-chart-pie fa-3x text-info mb-3"></i>
-                                <h5>Por Estado</h5>
-                                <p class="text-muted">Reporte filtrado por estado</p>
-                                <select class="form-select mb-3" id="filtroEstado">
+                    <div class="panel__body">
+                        <div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+                            <article class="stat-card" style="gap:0.85rem;">
+                                <i class="fas fa-file-excel"></i>
+                                <h4>Reporte general</h4>
+                                <span>Todos los tickets sin filtros.</span>
+                                <button class="btn btn-primary" onclick="generarReporteExcel('general')"><i class="fas fa-download"></i>Descargar</button>
+                            </article>
+                            <article class="stat-card" style="gap:0.85rem;">
+                                <i class="fas fa-chart-pie"></i>
+                                <h4>Por estado</h4>
+                                <span>Selecciona un estado específico.</span>
+                                <select id="filtroEstado">
                                     <option value="todos">Todos los estados</option>
                                     <option value="abierto">Abiertos</option>
-                                    <option value="en_proceso">En Proceso</option>
+                                    <option value="en_proceso">En proceso</option>
                                     <option value="resuelto">Resueltos</option>
                                     <option value="cerrado">Cerrados</option>
                                 </select>
-                                <button class="btn btn-info" onclick="generarReporteExcel('estado')">
-                                    <i class="fas fa-download me-2"></i>Descargar
-                                </button>
-                            </div>
+                                <button class="btn btn-ghost" onclick="generarReporteExcel('estado')"><i class="fas fa-download"></i>Descargar</button>
+                            </article>
+                            <article class="stat-card" style="gap:0.85rem;">
+                                <i class="fas fa-calendar"></i>
+                                <h4>Por fecha</h4>
+                                <span>Define el rango de fechas.</span>
+                                <input type="date" id="fechaInicio">
+                                <input type="date" id="fechaFin">
+                                <button class="btn btn-outline" onclick="generarReporteExcel('fecha')"><i class="fas fa-download"></i>Descargar</button>
+                            </article>
                         </div>
                     </div>
-                    
-                    <div class="col-md-4 mb-4">
-                        <div class="card card-dashboard">
-                            <div class="card-body text-center">
-                                <i class="fas fa-calendar fa-3x text-warning mb-3"></i>
-                                <h5>Por Fecha</h5>
-                                <p class="text-muted">Reporte por rango de fechas</p>
-                                <input type="date" class="form-control mb-2" id="fechaInicio">
-                                <input type="date" class="form-control mb-3" id="fechaFin">
-                                <button class="btn btn-warning" onclick="generarReporteExcel('fecha')">
-                                    <i class="fas fa-download me-2"></i>Descargar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                </section>
+            </section>
+        </div>
+    </main>
+
+    <div class="modal" id="modalVerTicket" aria-hidden="true">
+        <div class="modal__dialog">
+            <header class="modal__header">
+                <h5 id="modalVerTicketTitle"></h5>
+                <button type="button" class="btn-close" data-modal-close aria-label="Cerrar"><i class="fas fa-xmark"></i></button>
+            </header>
+            <div class="modal__body" id="modalVerTicketBody"></div>
+            <footer class="modal__footer" id="modalVerTicketFooter"></footer>
         </div>
     </div>
 
-    <!-- Modal Ver Ticket -->
-    <div class="modal fade" id="modalVerTicket" tabindex="-1">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header modal-header-custom">
-                    <h5 class="modal-title" id="modalVerTicketTitle"></h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" id="modalVerTicketBody">
-                    <!-- Contenido dinámico -->
-                </div>
-                <div class="modal-footer" id="modalVerTicketFooter">
-                    <!-- Botones dinámicos -->
+    <div class="modal" id="modalResolverTicket" aria-hidden="true">
+        <div class="modal__dialog" style="width:min(520px, 92vw);">
+            <header class="modal__header">
+                <h5><i class="fas fa-check"></i>Resolver ticket</h5>
+                <button type="button" class="btn-close" data-modal-close aria-label="Cerrar"><i class="fas fa-xmark"></i></button>
+            </header>
+            <div class="modal__body">
+                <div class="form-field">
+                    <label for="resolucionTexto">Detalle de la resolución *</label>
+                    <textarea id="resolucionTexto" rows="4" placeholder="Registra la acción correctiva"></textarea>
                 </div>
             </div>
+            <footer class="modal__footer">
+                <button type="button" class="btn btn-ghost" data-modal-close>Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmarResolucion()"><i class="fas fa-check"></i>Marcar como resuelto</button>
+            </footer>
         </div>
     </div>
 
-    <!-- Modal Resolver Ticket -->
-    <div class="modal fade" id="modalResolverTicket" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header modal-header-custom">
-                    <h5 class="modal-title"><i class="fas fa-check me-2"></i>Resolver Ticket</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Descripción de la resolución</label>
-                        <textarea class="form-control" id="resolucionTexto" rows="4" placeholder="Describe cómo se resolvió el problema..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-success" onclick="confirmarResolucion()">
-                        <i class="fas fa-check me-2"></i>Marcar como Resuelto
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="toast-stack" id="toastStack"></div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <?php endif; ?>
+
     <script>
+        (function() {
+            const modalRegistry = new WeakMap();
+
+            class Modal {
+                constructor(element) {
+                    if (modalRegistry.has(element)) {
+                        return modalRegistry.get(element);
+                    }
+
+                    this.element = element;
+                    this.dialog = element.querySelector('.modal__dialog');
+                    this.bindEvents();
+                    modalRegistry.set(element, this);
+                }
+
+                bindEvents() {
+                    this.element.addEventListener('click', (event) => {
+                        if (event.target === this.element) {
+                            this.hide();
+                        }
+                    });
+                    this.element.querySelectorAll('[data-modal-close]').forEach(btn => {
+                        btn.addEventListener('click', () => this.hide());
+                    });
+                }
+
+                show() {
+                    this.element.classList.add('modal--visible');
+                    this.element.setAttribute('aria-hidden', 'false');
+                    document.body.classList.add('modal-open');
+                }
+
+                hide() {
+                    this.element.classList.remove('modal--visible');
+                    this.element.setAttribute('aria-hidden', 'true');
+                    document.body.classList.remove('modal-open');
+                }
+
+                static getInstance(element) {
+                    return modalRegistry.get(element) || new Modal(element);
+                }
+            }
+
+            window.bootstrap = window.bootstrap || {};
+            window.bootstrap.Modal = Modal;
+        })();
+
+        <?php if ($isLoggedIn): ?>
+        const toastStack = document.getElementById('toastStack');
+        const sections = document.querySelectorAll('.section');
+        const navButtons = document.querySelectorAll('.nav-button');
+
         let usuarioActual = {
-            id: <?= $_SESSION['admin_id'] ?>,
+            id: <?= (int) $_SESSION['admin_id'] ?>,
             nombre: '<?= addslashes($_SESSION['admin_nombre']) ?>',
             email: '<?= addslashes($_SESSION['admin_email']) ?>',
             rol: 'it'
         };
 
         let ticketSeleccionado = null;
-        let ticketsDashboard = []; // Almacenar tickets del dashboard
-        let ticketsCompletos = []; // Almacenar todos los tickets
+        let ticketsDashboard = [];
+        let ticketsCompletos = [];
 
-        // Inicialización
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', () => {
             cargarDashboard();
             configurarFechas();
         });
+
+        function mostrarMensaje(mensaje, tipo = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast--${tipo}`;
+            toast.innerHTML = `
+                <span class="toast__message">${mensaje}</span>
+                <button type="button" class="toast__close" aria-label="Cerrar"><i class="fas fa-xmark"></i></button>
+            `;
+
+            const cerrar = () => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-10px)';
+                setTimeout(() => toast.remove(), 250);
+            };
+
+            toast.querySelector('.toast__close').addEventListener('click', cerrar);
+            toastStack.appendChild(toast);
+            setTimeout(cerrar, 5000);
+        }
+
+        function mostrarSeccion(sectionId, trigger) {
+            sections.forEach(section => {
+                section.classList.toggle('is-active', section.id === sectionId);
+            });
+            navButtons.forEach(btn => {
+                btn.classList.toggle('is-active', btn.dataset.section === sectionId);
+            });
+
+            if (sectionId === 'todos-tickets') {
+                cargarTodosTickets();
+            }
+        }
 
         function cargarDashboard() {
             cargarEstadisticas();
@@ -1029,7 +998,7 @@ if (isset($_GET['logout'])) {
             try {
                 const response = await fetch('api/tickets_admin.php?action=estadisticas');
                 const data = await response.json();
-                
+
                 if (data.success) {
                     mostrarEstadisticas(data.data);
                 }
@@ -1040,25 +1009,21 @@ if (isset($_GET['logout'])) {
 
         function mostrarEstadisticas(stats) {
             const container = document.getElementById('statsCards');
-            const statCards = [
-                { titulo: 'Total Tickets', valor: stats.total, icono: 'fas fa-ticket-alt', color: 'primary' },
-                { titulo: 'Abiertos', valor: stats.abiertos, icono: 'fas fa-folder-open', color: 'danger' },
-                { titulo: 'En Proceso', valor: stats.en_proceso, icono: 'fas fa-cog', color: 'warning' },
-                { titulo: 'Resueltos', valor: stats.resueltos, icono: 'fas fa-check-circle', color: 'success' },
-                { titulo: 'No Resueltos', valor: stats.no_resueltos, icono: 'fas fa-times-circle', color: 'danger' },
-                { titulo: 'Pendientes', valor: stats.pendientes, icono: 'fas fa-clock', color: 'info' }
+            const cards = [
+                { titulo: 'Total tickets', valor: stats.total, icono: 'fas fa-ticket' },
+                { titulo: 'Abiertos', valor: stats.abiertos, icono: 'fas fa-folder-open' },
+                { titulo: 'En proceso', valor: stats.en_proceso, icono: 'fas fa-cog' },
+                { titulo: 'Resueltos', valor: stats.resueltos, icono: 'fas fa-circle-check' },
+                { titulo: 'No resueltos', valor: stats.no_resueltos, icono: 'fas fa-circle-xmark' },
+                { titulo: 'Pendientes', valor: stats.pendientes, icono: 'fas fa-clock' }
             ];
-            
-            container.innerHTML = statCards.map(stat => `
-                <div class="col-md-2 mb-4">
-                    <div class="card stat-card">
-                        <div class="card-body text-center">
-                            <i class="${stat.icono} fa-2x mb-3"></i>
-                            <h3 class="fw-bold">${stat.valor}</h3>
-                            <p class="mb-0">${stat.titulo}</p>
-                        </div>
-                    </div>
-                </div>
+
+            container.innerHTML = cards.map(card => `
+                <article class="stat-card">
+                    <i class="${card.icono}"></i>
+                    <h4>${card.valor}</h4>
+                    <span>${card.titulo}</span>
+                </article>
             `).join('');
         }
 
@@ -1066,7 +1031,7 @@ if (isset($_GET['logout'])) {
             try {
                 const response = await fetch('api/tickets_admin.php');
                 const data = await response.json();
-                
+
                 if (data.success) {
                     mostrarTickets(data.data);
                 }
@@ -1076,41 +1041,78 @@ if (isset($_GET['logout'])) {
         }
 
         function mostrarTickets(tickets) {
-            ticketsDashboard = tickets; // Guardar tickets para filtrado posterior
+            ticketsDashboard = tickets || [];
             const tableBody = document.getElementById('ticketsTable');
 
-            tableBody.innerHTML = tickets.map(ticket => `
+            if (!ticketsDashboard.length) {
+                tableBody.innerHTML = `<tr><td colspan="8"><div class="empty-state">No se registran tickets recientes.</div></td></tr>`;
+                return;
+            }
+
+            tableBody.innerHTML = ticketsDashboard.map(ticket => `
                 <tr class="ticket-priority-${ticket.prioridad}" data-estado="${ticket.estado}" data-fecha="${ticket.fecha_creacion}">
                     <td>${ticket.titulo}</td>
-                    <td><span class="badge bg-${obtenerColorPrioridad(ticket.prioridad)} status-badge">${ticket.prioridad.toUpperCase()}</span></td>
-                    <td><span class="badge bg-${obtenerColorEstado(ticket.estado)} status-badge">${ticket.estado.replace('_', ' ').toUpperCase()}</span></td>
+                    <td><span class="badge bg-${obtenerColorPrioridad(ticket.prioridad)}">${ticket.prioridad.toUpperCase()}</span></td>
+                    <td><span class="badge bg-${obtenerColorEstado(ticket.estado)}">${ticket.estado.replace('_', ' ').toUpperCase()}</span></td>
                     <td>${ticket.solicitante_nombre}</td>
                     <td>${ticket.numero_ficha}</td>
-                    <td>${ticket.asignado_nombre || '<span class="text-muted">Sin asignar</span>'}</td>
+                    <td>${ticket.asignado_nombre || '<span class="panel__hint">Sin asignar</span>'}</td>
                     <td>${formatearFecha(ticket.fecha_creacion)}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-primary" onclick="verTicket(${ticket.id})">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        ${ticket.estado === 'abierto' ?
-                            `<button class="btn btn-sm btn-outline-success ms-1" onclick="tomarTicket(${ticket.id})">
-                                <i class="fas fa-hand-paper"></i>
-                            </button>` : ''}
+                        <div class="table-actions">
+                            <button class="btn btn-outline btn-sm" onclick="verTicket(${ticket.id})"><i class="fas fa-eye"></i></button>
+                            ${ticket.estado === 'abierto' ? `<button class="btn btn-ghost btn-sm" onclick="tomarTicket(${ticket.id})"><i class="fas fa-hand"></i></button>` : ''}
+                        </div>
                     </td>
                 </tr>
             `).join('');
         }
 
-        // Event listener para cambio de pestaña
-        document.getElementById('todos-tickets-tab').addEventListener('shown.bs.tab', function() {
-            cargarTodosTickets();
-        });
+        function filtrarTickets(estado, event) {
+            if (event) {
+                const chips = event.currentTarget.parentElement.querySelectorAll('.btn-chip');
+                chips.forEach(chip => chip.classList.remove('is-active'));
+                event.currentTarget.classList.add('is-active');
+            }
+
+            const rows = document.querySelectorAll('#ticketsTable tr');
+            rows.forEach(row => {
+                if (!estado || estado === 'todos') {
+                    row.style.display = '';
+                } else {
+                    row.style.display = row.getAttribute('data-estado') === estado ? '' : 'none';
+                }
+            });
+        }
+
+        function filtrarTicketsPorMes(filtro, event) {
+            if (event) {
+                const chips = event.currentTarget.parentElement.querySelectorAll('.btn-chip');
+                chips.forEach(chip => chip.classList.remove('is-active'));
+                event.currentTarget.classList.add('is-active');
+            }
+
+            const ahora = new Date();
+            const mesActual = ahora.getMonth();
+            const añoActual = ahora.getFullYear();
+
+            const rows = document.querySelectorAll('#ticketsTable tr');
+            rows.forEach(row => {
+                if (!filtro || filtro === 'todos') {
+                    row.style.display = '';
+                } else {
+                    const fecha = new Date(row.getAttribute('data-fecha'));
+                    const mismoMes = fecha.getMonth() === mesActual && fecha.getFullYear() === añoActual;
+                    row.style.display = filtro === 'mes_actual' && !mismoMes ? 'none' : '';
+                }
+            });
+        }
 
         async function cargarTodosTickets() {
             try {
                 const response = await fetch('api/tickets_admin.php?action=todos');
                 const data = await response.json();
-                
+
                 if (data.success) {
                     mostrarTodosTickets(data.data);
                 }
@@ -1120,51 +1122,90 @@ if (isset($_GET['logout'])) {
         }
 
         function mostrarTodosTickets(tickets) {
-            ticketsCompletos = tickets; // Guardar tickets para filtrado posterior
+            ticketsCompletos = tickets || [];
             const tableBody = document.getElementById('todosTicketsTable');
 
-            tableBody.innerHTML = tickets.map(ticket => `
+            if (!ticketsCompletos.length) {
+                tableBody.innerHTML = `<tr><td colspan="9"><div class="empty-state">No hay tickets registrados.</div></td></tr>`;
+                return;
+            }
+
+            tableBody.innerHTML = ticketsCompletos.map(ticket => `
                 <tr class="ticket-priority-${ticket.prioridad}" data-estado="${ticket.estado}" data-fecha="${ticket.fecha_creacion}">
                     <td><strong>#${ticket.id}</strong></td>
                     <td>${ticket.titulo}</td>
-                    <td><span class="badge bg-${obtenerColorPrioridad(ticket.prioridad)} status-badge">${ticket.prioridad.toUpperCase()}</span></td>
-                    <td><span class="badge bg-${obtenerColorEstado(ticket.estado)} status-badge">${ticket.estado.replace('_', ' ').toUpperCase()}</span></td>
+                    <td><span class="badge bg-${obtenerColorPrioridad(ticket.prioridad)}">${ticket.prioridad.toUpperCase()}</span></td>
+                    <td><span class="badge bg-${obtenerColorEstado(ticket.estado)}">${ticket.estado.replace('_', ' ').toUpperCase()}</span></td>
                     <td>${ticket.solicitante_nombre}</td>
                     <td>${ticket.numero_ficha}</td>
-                    <td>${ticket.asignado_nombre || '<span class="text-muted">Sin asignar</span>'}</td>
+                    <td>${ticket.asignado_nombre || '<span class="panel__hint">Sin asignar</span>'}</td>
                     <td>${formatearFecha(ticket.fecha_creacion)}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-primary" onclick="verTicket(${ticket.id})">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        ${ticket.estado === 'abierto' ?
-                            `<button class="btn btn-sm btn-outline-success ms-1" onclick="tomarTicket(${ticket.id})">
-                                <i class="fas fa-hand-paper"></i>
-                            </button>` : ''}
+                        <div class="table-actions">
+                            <button class="btn btn-outline btn-sm" onclick="verTicket(${ticket.id})"><i class="fas fa-eye"></i></button>
+                            ${ticket.estado === 'abierto' ? `<button class="btn btn-ghost btn-sm" onclick="tomarTicket(${ticket.id})"><i class="fas fa-hand"></i></button>` : ''}
+                        </div>
                     </td>
                 </tr>
             `).join('');
+        }
+
+        function filtrarTodosTickets(estado, event) {
+            if (event) {
+                const chips = event.currentTarget.parentElement.querySelectorAll('.btn-chip');
+                chips.forEach(chip => chip.classList.remove('is-active'));
+                event.currentTarget.classList.add('is-active');
+            }
+
+            const rows = document.querySelectorAll('#todosTicketsTable tr');
+            rows.forEach(row => {
+                if (!estado || estado === 'todos') {
+                    row.style.display = '';
+                } else {
+                    row.style.display = row.getAttribute('data-estado') === estado ? '' : 'none';
+                }
+            });
+        }
+
+        function filtrarTodosTicketsPorMes(filtro, event) {
+            if (event) {
+                const chips = event.currentTarget.parentElement.querySelectorAll('.btn-chip');
+                chips.forEach(chip => chip.classList.remove('is-active'));
+                event.currentTarget.classList.add('is-active');
+            }
+
+            const ahora = new Date();
+            const mesActual = ahora.getMonth();
+            const añoActual = ahora.getFullYear();
+
+            const rows = document.querySelectorAll('#todosTicketsTable tr');
+            rows.forEach(row => {
+                if (!filtro || filtro === 'todos') {
+                    row.style.display = '';
+                } else {
+                    const fecha = new Date(row.getAttribute('data-fecha'));
+                    const mismoMes = fecha.getMonth() === mesActual && fecha.getFullYear() === añoActual;
+                    row.style.display = filtro === 'mes_actual' && !mismoMes ? 'none' : '';
+                }
+            });
         }
 
         async function verTicket(ticketId) {
             try {
                 const response = await fetch(`api/tickets_admin.php?action=detalle&id=${ticketId}`);
                 const data = await response.json();
-                
+
                 if (data.success) {
-                    // Obtener archivos adjuntos
                     try {
                         const archivosResponse = await fetch(`api/tickets_publico.php?action=detalle&id=${ticketId}`);
                         const archivosData = await archivosResponse.json();
-                        
                         if (archivosData.success && archivosData.data.archivos) {
                             data.data.archivos = archivosData.data.archivos;
                         }
-                    } catch (error) {
-                        console.log('No se pudieron cargar los archivos adjuntos:', error);
+                    } catch (err) {
                         data.data.archivos = [];
                     }
-                    
+
                     mostrarDetalleTicket(data.data);
                 } else {
                     mostrarMensaje(data.message || 'Error al cargar el ticket', 'danger');
@@ -1175,178 +1216,113 @@ if (isset($_GET['logout'])) {
         }
 
         function mostrarDetalleTicket(ticket) {
-            const modal = document.getElementById('modalVerTicket');
+            const modalElement = document.getElementById('modalVerTicket');
             const title = document.getElementById('modalVerTicketTitle');
             const body = document.getElementById('modalVerTicketBody');
             const footer = document.getElementById('modalVerTicketFooter');
-            
-            title.innerHTML = `<i class="fas fa-ticket-alt me-2"></i>Ticket #${ticket.id} - ${ticket.titulo}`;
-            
-            // Preparar archivos adjuntos si existen
-            let archivosHtml = '';
-            if (ticket.archivos && ticket.archivos.length > 0) {
-                archivosHtml = `
-                    <div class="col-12 mt-3">
-                        <h6><i class="fas fa-paperclip me-2"></i>Archivos Adjuntos</h6>
-                        <div class="row">
-                            ${ticket.archivos.map((archivo, index) => {
-                                const esImagen = ['jpg', 'jpeg', 'png', 'gif'].includes(archivo.tipo_archivo.toLowerCase());
-                                
-                                if (esImagen) {
-                                    return `
-                                        <div class="col-md-3 mb-3">
-                                            <div class="card">
-                                                <img src="uploads/${archivo.ruta_archivo}" 
-                                                     class="card-img-top" 
-                                                     style="height: 150px; object-fit: cover; cursor: pointer;"
-                                                     onclick="verImagenCompleta('uploads/${archivo.ruta_archivo}', '${archivo.nombre_archivo}')"
-                                                     title="Clic para ver tamaño completo">
-                                                <div class="card-body p-2">
-                                                    <small class="text-muted">${archivo.nombre_archivo}</small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    `;
-                                } else {
-                                    return `
-                                        <div class="col-md-3 mb-3">
-                                            <div class="card text-center">
-                                                <div class="card-body">
-                                                    <i class="fas fa-file-alt fa-3x text-primary mb-2"></i>
-                                                    <h6 class="card-title">${archivo.nombre_archivo}</h6>
-                                                    <a href="uploads/${archivo.ruta_archivo}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                        <i class="fas fa-download me-1"></i>Descargar
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    `;
-                                }
-                            }).join('')}
-                        </div>
+
+            title.innerHTML = `<i class="fas fa-ticket"></i> Ticket #${ticket.id} · ${ticket.titulo}`;
+
+            const archivos = ticket.archivos || [];
+            const attachments = archivos.length ? `
+                <section class="detail-card">
+                    <h6><i class="fas fa-paperclip"></i> Archivos adjuntos</h6>
+                    <div class="detail-grid" style="display:grid; gap:0.6rem;">
+                        ${archivos.map(archivo => {
+                            const esImagen = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(archivo.tipo_archivo.toLowerCase());
+                            return esImagen
+                                ? `<div><button class="btn btn-outline btn-sm" onclick="verImagenCompleta('uploads/${archivo.ruta_archivo}', '${archivo.nombre_archivo}')"><i class="fas fa-image"></i>${archivo.nombre_archivo}</button></div>`
+                                : `<div><a class="btn btn-outline btn-sm" href="uploads/${archivo.ruta_archivo}" target="_blank"><i class="fas fa-file"></i>${archivo.nombre_archivo}</a></div>`;
+                        }).join('')}
                     </div>
-                `;
-            }
-            
+                </section>
+            ` : '';
+
             body.innerHTML = `
-                <div class="row">
-                    <div class="col-md-8">
-                        <h6><i class="fas fa-info-circle me-2"></i>Detalles del Ticket</h6>
-                        <table class="table table-borderless">
-                            <tr><td><strong>Título:</strong></td><td>${ticket.titulo}</td></tr>
-                            <tr><td><strong>Descripción:</strong></td><td>${ticket.descripcion}</td></tr>
-                            <tr><td><strong>Categoría:</strong></td><td>${ticket.categoria}</td></tr>
-                            <tr><td><strong>Prioridad:</strong></td><td><span class="badge bg-${obtenerColorPrioridad(ticket.prioridad)}">${ticket.prioridad.toUpperCase()}</span></td></tr>
-                            <tr><td><strong>Estado:</strong></td><td><span class="badge bg-${obtenerColorEstado(ticket.estado)}">${ticket.estado.replace('_', ' ').toUpperCase()}</span></td></tr>
-                            <tr><td><strong>Solicitante:</strong></td><td>${ticket.solicitante_nombre}</td></tr>
-                            <tr><td><strong>Número de Ficha:</strong></td><td>${ticket.numero_ficha}</td></tr>
-                            <tr><td><strong>Asignado a:</strong></td><td>${ticket.asignado_nombre || '<span class="text-muted">Sin asignar</span>'}</td></tr>
-                            <tr><td><strong>Fecha creación:</strong></td><td>${formatearFecha(ticket.fecha_creacion)}</td></tr>
-                            ${ticket.fecha_resolucion ? `<tr><td><strong>Fecha resolución:</strong></td><td>${formatearFecha(ticket.fecha_resolucion)}</td></tr>` : ''}
-                            ${ticket.resolucion ? `<tr><td><strong>Resolución:</strong></td><td>${ticket.resolucion}</td></tr>` : ''}
-                        </table>
-                    </div>
-                    <div class="col-md-4">
-                        <h6><i class="fas fa-clock me-2"></i>Historial</h6>
-                        <div class="timeline">
-                            <div class="timeline-item">
-                                <div class="timeline-marker bg-primary"></div>
-                                <div class="timeline-content">
-                                    <h6 class="timeline-title">Ticket Creado</h6>
-                                    <p class="timeline-text">${formatearFecha(ticket.fecha_creacion)}</p>
-                                </div>
-                            </div>
-                            ${ticket.asignado_nombre ? `
-                                <div class="timeline-item">
-                                    <div class="timeline-marker bg-warning"></div>
-                                    <div class="timeline-content">
-                                        <h6 class="timeline-title">Asignado</h6>
-                                        <p class="timeline-text">Tomado por: ${ticket.asignado_nombre}</p>
-                                    </div>
-                                </div>
-                            ` : ''}
-                            ${ticket.estado === 'resuelto' || ticket.estado === 'cerrado' ? `
-                                <div class="timeline-item">
-                                    <div class="timeline-marker bg-success"></div>
-                                    <div class="timeline-content">
-                                        <h6 class="timeline-title">Resuelto</h6>
-                                        <p class="timeline-text">${formatearFecha(ticket.fecha_resolucion)}</p>
-                                    </div>
-                                </div>
-                            ` : ''}
+                <div class="detail-columns">
+                    <section class="detail-card">
+                        <h6>Resumen</h6>
+                        <div class="detail-grid">
+                            <div><span class="panel__hint">Descripción</span><strong>${ticket.descripcion}</strong></div>
+                            <div><span class="panel__hint">Categoría</span><strong>${ticket.categoria}</strong></div>
+                            <div><span class="panel__hint">Prioridad</span><strong><span class="badge bg-${obtenerColorPrioridad(ticket.prioridad)}">${ticket.prioridad.toUpperCase()}</span></strong></div>
+                            <div><span class="panel__hint">Estado</span><strong><span class="badge bg-${obtenerColorEstado(ticket.estado)}">${ticket.estado.replace('_', ' ').toUpperCase()}</span></strong></div>
                         </div>
-                    </div>
-                    ${archivosHtml}
+                    </section>
+                    <section class="detail-card">
+                        <h6>Seguimiento</h6>
+                        <div class="detail-grid">
+                            <div><span class="panel__hint">Solicitante</span><strong>${ticket.solicitante_nombre}</strong></div>
+                            <div><span class="panel__hint">Ficha</span><strong>${ticket.numero_ficha}</strong></div>
+                            <div><span class="panel__hint">Asignado a</span><strong>${ticket.asignado_nombre || 'Sin asignar'}</strong></div>
+                            <div><span class="panel__hint">Creado el</span><strong>${formatearFecha(ticket.fecha_creacion)}</strong></div>
+                            ${ticket.fecha_resolucion ? `<div><span class="panel__hint">Resuelto el</span><strong>${formatearFecha(ticket.fecha_resolucion)}</strong></div>` : ''}
+                            ${ticket.resolucion ? `<div><span class="panel__hint">Resolución</span><strong>${ticket.resolucion}</strong></div>` : ''}
+                        </div>
+                    </section>
+                    <section class="detail-card">
+                        <h6>Historial</h6>
+                        <div class="detail-grid">
+                            <div><span class="panel__hint">Ticket creado</span><strong>${formatearFecha(ticket.fecha_creacion)}</strong></div>
+                            ${ticket.asignado_nombre ? `<div><span class="panel__hint">Asignado</span><strong>${ticket.asignado_nombre}</strong></div>` : ''}
+                            ${ticket.fecha_resolucion ? `<div><span class="panel__hint">Resuelto</span><strong>${formatearFecha(ticket.fecha_resolucion)}</strong></div>` : ''}
+                        </div>
+                    </section>
+                    ${attachments}
                 </div>
             `;
-            
-            // Configurar botones del footer según el estado
-            let footerButtons = '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>';
-            
+
+            let footerButtons = `<button type="button" class="btn btn-ghost" data-modal-close>Cerrar</button>`;
+
             if (ticket.estado === 'abierto') {
                 footerButtons = `
-                    <button type="button" class="btn btn-success" onclick="tomarTicket(${ticket.id})">
-                        <i class="fas fa-hand-paper me-2"></i>Tomar Ticket
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="tomarTicket(${ticket.id})"><i class="fas fa-hand"></i>Tomar ticket</button>
+                    <button type="button" class="btn btn-ghost" data-modal-close>Cerrar</button>
                 `;
             } else if (ticket.estado === 'en_proceso' && ticket.asignado_a == usuarioActual.id) {
                 footerButtons = `
-                    <button type="button" class="btn btn-success" onclick="mostrarModalResolver(${ticket.id})">
-                        <i class="fas fa-check me-2"></i>Marcar como Resuelto
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="mostrarModalResolver(${ticket.id})"><i class="fas fa-check"></i>Marcar como resuelto</button>
+                    <button type="button" class="btn btn-ghost" data-modal-close>Cerrar</button>
                 `;
             }
-            
+
             footer.innerHTML = footerButtons;
-            new bootstrap.Modal(modal).show();
+            new bootstrap.Modal(modalElement).show();
         }
 
-        // Función para ver imagen en tamaño completo
         function verImagenCompleta(rutaImagen, nombreArchivo) {
             const modal = document.createElement('div');
-            modal.className = 'modal fade';
+            modal.className = 'modal';
             modal.innerHTML = `
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">
-                                <i class="fas fa-image me-2"></i>${nombreArchivo}
-                            </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body text-center">
-                            <img src="${rutaImagen}" class="img-fluid" style="max-height: 70vh;">
-                        </div>
-                        <div class="modal-footer">
-                            <a href="${rutaImagen}" download="${nombreArchivo}" class="btn btn-primary">
-                                <i class="fas fa-download me-2"></i>Descargar
-                            </a>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                        </div>
+                <div class="modal__dialog" style="width:min(720px, 94vw);">
+                    <header class="modal__header">
+                        <h5><i class="fas fa-image"></i>${nombreArchivo}</h5>
+                        <button type="button" class="btn-close" data-modal-close aria-label="Cerrar"><i class="fas fa-xmark"></i></button>
+                    </header>
+                    <div class="modal__body" style="justify-items:center;">
+                        <img src="${rutaImagen}" alt="${nombreArchivo}" style="max-width:100%; max-height:70vh; border-radius: var(--radius-md);">
                     </div>
+                    <footer class="modal__footer">
+                        <a class="btn btn-outline" href="${rutaImagen}" download="${nombreArchivo}"><i class="fas fa-download"></i>Descargar</a>
+                        <button type="button" class="btn btn-ghost" data-modal-close>Cerrar</button>
+                    </footer>
                 </div>
             `;
-            
             document.body.appendChild(modal);
-            const bsModal = new bootstrap.Modal(modal);
-            bsModal.show();
-            
-            // Remover modal del DOM cuando se cierre
-            modal.addEventListener('hidden.bs.modal', function() {
-                document.body.removeChild(modal);
+            const instance = new bootstrap.Modal(modal);
+            modal.addEventListener('transitionend', () => {
+                if (!modal.classList.contains('modal--visible')) {
+                    modal.remove();
+                }
             });
+            instance.show();
         }
 
         async function tomarTicket(ticketId) {
             try {
-                const response = await fetch(`api/tickets_admin.php?action=tomar&id=${ticketId}`, {
-                    method: 'POST'
-                });
-                
+                const response = await fetch(`api/tickets_admin.php?action=tomar&id=${ticketId}`, { method: 'POST' });
                 const data = await response.json();
-                
+
                 if (data.success) {
                     cargarDashboard();
                     bootstrap.Modal.getInstance(document.getElementById('modalVerTicket'))?.hide();
@@ -1367,22 +1343,22 @@ if (isset($_GET['logout'])) {
 
         async function confirmarResolucion() {
             if (!ticketSeleccionado) return;
-            
-            const resolucion = document.getElementById('resolucionTexto').value;
-            
+            const resolucion = document.getElementById('resolucionTexto').value.trim();
+
+            if (!resolucion) {
+                mostrarMensaje('Describe la resolución aplicada', 'warning');
+                return;
+            }
+
             try {
                 const response = await fetch(`api/tickets_admin.php?action=resolver&id=${ticketSeleccionado}`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        resolucion: resolucion
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ resolucion })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     bootstrap.Modal.getInstance(document.getElementById('modalResolverTicket')).hide();
                     document.getElementById('resolucionTexto').value = '';
@@ -1396,193 +1372,57 @@ if (isset($_GET['logout'])) {
             }
         }
 
-        function filtrarTickets(estado) {
-            event.target.parentNode.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            const rows = document.querySelectorAll('#ticketsTable tr');
-            rows.forEach(row => {
-                if (estado === 'todos') {
-                    row.style.display = '';
-                } else {
-                    const estadoTicket = row.getAttribute('data-estado');
-                    row.style.display = estadoTicket === estado ? '' : 'none';
-                }
-            });
-        }
-
-        function filtrarTodosTickets(estado) {
-            event.target.parentNode.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-
-            const rows = document.querySelectorAll('#todosTicketsTable tr');
-            rows.forEach(row => {
-                if (estado === 'todos') {
-                    row.style.display = '';
-                } else {
-                    const estadoTicket = row.getAttribute('data-estado');
-                    row.style.display = estadoTicket === estado ? '' : 'none';
-                }
-            });
-        }
-
-        function filtrarTicketsPorMes(filtro) {
-            // Actualizar botones activos
-            document.getElementById('btnFiltroMesTodos').classList.remove('active');
-            document.getElementById('btnFiltroMesActual').classList.remove('active');
-
-            if (filtro === 'todos') {
-                document.getElementById('btnFiltroMesTodos').classList.add('active');
-            } else {
-                document.getElementById('btnFiltroMesActual').classList.add('active');
-            }
-
-            const ahora = new Date();
-            const mesActual = ahora.getMonth();
-            const añoActual = ahora.getFullYear();
-
-            let ticketsFiltrados = ticketsDashboard;
-
-            if (filtro === 'mes_actual') {
-                ticketsFiltrados = ticketsDashboard.filter(ticket => {
-                    const fechaTicket = new Date(ticket.fecha_creacion);
-                    return fechaTicket.getMonth() === mesActual && fechaTicket.getFullYear() === añoActual;
-                });
-            }
-
-            // Mostrar tickets filtrados
-            const tableBody = document.getElementById('ticketsTable');
-            tableBody.innerHTML = ticketsFiltrados.map(ticket => `
-                <tr class="ticket-priority-${ticket.prioridad}" data-estado="${ticket.estado}" data-fecha="${ticket.fecha_creacion}">
-                    <td>${ticket.titulo}</td>
-                    <td><span class="badge bg-${obtenerColorPrioridad(ticket.prioridad)} status-badge">${ticket.prioridad.toUpperCase()}</span></td>
-                    <td><span class="badge bg-${obtenerColorEstado(ticket.estado)} status-badge">${ticket.estado.replace('_', ' ').toUpperCase()}</span></td>
-                    <td>${ticket.solicitante_nombre}</td>
-                    <td>${ticket.numero_ficha}</td>
-                    <td>${ticket.asignado_nombre || '<span class="text-muted">Sin asignar</span>'}</td>
-                    <td>${formatearFecha(ticket.fecha_creacion)}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary" onclick="verTicket(${ticket.id})">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        ${ticket.estado === 'abierto' ?
-                            `<button class="btn btn-sm btn-outline-success ms-1" onclick="tomarTicket(${ticket.id})">
-                                <i class="fas fa-hand-paper"></i>
-                            </button>` : ''}
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function filtrarTodosTicketsPorMes(filtro) {
-            // Actualizar botones activos
-            document.getElementById('btnFiltroMesTodosTodos').classList.remove('active');
-            document.getElementById('btnFiltroMesTodosMesActual').classList.remove('active');
-
-            if (filtro === 'todos') {
-                document.getElementById('btnFiltroMesTodosTodos').classList.add('active');
-            } else {
-                document.getElementById('btnFiltroMesTodosMesActual').classList.add('active');
-            }
-
-            const ahora = new Date();
-            const mesActual = ahora.getMonth();
-            const añoActual = ahora.getFullYear();
-
-            let ticketsFiltrados = ticketsCompletos;
-
-            if (filtro === 'mes_actual') {
-                ticketsFiltrados = ticketsCompletos.filter(ticket => {
-                    const fechaTicket = new Date(ticket.fecha_creacion);
-                    return fechaTicket.getMonth() === mesActual && fechaTicket.getFullYear() === añoActual;
-                });
-            }
-
-            // Mostrar tickets filtrados
-            const tableBody = document.getElementById('todosTicketsTable');
-            tableBody.innerHTML = ticketsFiltrados.map(ticket => `
-                <tr class="ticket-priority-${ticket.prioridad}" data-estado="${ticket.estado}" data-fecha="${ticket.fecha_creacion}">
-                    <td><strong>#${ticket.id}</strong></td>
-                    <td>${ticket.titulo}</td>
-                    <td><span class="badge bg-${obtenerColorPrioridad(ticket.prioridad)} status-badge">${ticket.prioridad.toUpperCase()}</span></td>
-                    <td><span class="badge bg-${obtenerColorEstado(ticket.estado)} status-badge">${ticket.estado.replace('_', ' ').toUpperCase()}</span></td>
-                    <td>${ticket.solicitante_nombre}</td>
-                    <td>${ticket.numero_ficha}</td>
-                    <td>${ticket.asignado_nombre || '<span class="text-muted">Sin asignar</span>'}</td>
-                    <td>${formatearFecha(ticket.fecha_creacion)}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary" onclick="verTicket(${ticket.id})">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        ${ticket.estado === 'abierto' ?
-                            `<button class="btn btn-sm btn-outline-success ms-1" onclick="tomarTicket(${ticket.id})">
-                                <i class="fas fa-hand-paper"></i>
-                            </button>` : ''}
-                    </td>
-                </tr>
-            `).join('');
-        }
-
         function generarReporteExcel(tipo) {
-            let url = 'api/reportes.php?tipo=' + tipo;
-            
+            let url = 'api/reportes_admin.php?tipo=' + tipo;
+
             if (tipo === 'estado') {
                 const estado = document.getElementById('filtroEstado').value;
                 url += '&estado=' + estado;
             } else if (tipo === 'fecha') {
-                const fechaInicio = document.getElementById('fechaInicio').value;
-                const fechaFin = document.getElementById('fechaFin').value;
-                
-                if (!fechaInicio || !fechaFin) {
-                    mostrarMensaje('Por favor selecciona ambas fechas', 'warning');
+                const inicio = document.getElementById('fechaInicio').value;
+                const fin = document.getElementById('fechaFin').value;
+
+                if (!inicio || !fin) {
+                    mostrarMensaje('Selecciona ambas fechas para generar el reporte', 'warning');
                     return;
                 }
-                
-                url += '&fecha_inicio=' + fechaInicio + '&fecha_fin=' + fechaFin;
+
+                url += `&fecha_inicio=${inicio}&fecha_fin=${fin}`;
             }
-            
+
             const link = document.createElement('a');
             link.href = url;
             link.download = '';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
-            mostrarMensaje('Generando reporte Excel...', 'info');
+
+            mostrarMensaje('Generando reporte, la descarga iniciará enseguida', 'success');
         }
 
-        function mostrarMensaje(mensaje, tipo) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${tipo} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
-            alertDiv.style.zIndex = '9999';
-            alertDiv.innerHTML = `
-                ${mensaje}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            document.body.appendChild(alertDiv);
-            
-            setTimeout(() => {
-                alertDiv.remove();
-            }, 5000);
-        }
+        function configurarFechas() {
+            const hoy = new Date().toISOString().split('T')[0];
+            const hace30dias = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-        function formatearFecha(fecha) {
-            if (!fecha) return '-';
-            return new Date(fecha).toLocaleString('es-ES');
+            const inicio = document.getElementById('fechaInicio');
+            const fin = document.getElementById('fechaFin');
+            if (inicio && fin) {
+                inicio.value = hace30dias;
+                fin.value = hoy;
+            }
         }
 
         function obtenerColorPrioridad(prioridad) {
-            switch(prioridad) {
+            switch (prioridad) {
                 case 'urgente': return 'danger';
                 case 'alta': return 'warning';
                 case 'media': return 'info';
-                case 'baja': return 'secondary';
                 default: return 'secondary';
             }
         }
 
         function obtenerColorEstado(estado) {
-            switch(estado) {
+            switch (estado) {
                 case 'abierto': return 'primary';
                 case 'en_proceso': return 'warning';
                 case 'resuelto': return 'success';
@@ -1591,28 +1431,15 @@ if (isset($_GET['logout'])) {
             }
         }
 
-        function configurarFechas() {
-            const hoy = new Date().toISOString().split('T')[0];
-            const hace30dias = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-            
-            const fechaInicio = document.getElementById('fechaInicio');
-            const fechaFin = document.getElementById('fechaFin');
-            
-            if (fechaInicio && fechaFin) {
-                fechaInicio.value = hace30dias;
-                fechaFin.value = hoy;
-            }
+        function formatearFecha(fecha) {
+            if (!fecha) return '-';
+            return new Date(fecha).toLocaleString('es-ES');
         }
 
-        // Actualizar datos automáticamente cada 30 segundos
         setInterval(() => {
-            if (document.querySelector('#dashboard-tab').classList.contains('active')) {
-                cargarDashboard();
-            } else if (document.querySelector('#todos-tickets-tab').classList.contains('active')) {
-                cargarTodosTickets();
-            }
+            cargarDashboard();
         }, 30000);
+        <?php endif; ?>
     </script>
-    <?php endif; ?>
 </body>
 </html>
